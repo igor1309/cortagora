@@ -112,6 +112,30 @@ const TicketBuilderApp = {
         },
     },
 
+    // The API module handles all communication with the GitHub API.
+    api: {
+        _settings: null,
+
+        init(settings) {
+            this._settings = settings;
+        },
+
+        async fetchContent(endpoint) {
+            const url = `https://api.github.com/repos/${this._settings.repo}/contents/${endpoint}?ref=trunk`;
+            const response = await fetch(url, {
+                headers: { 'Authorization': `token ${this._settings.pat}`, 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (!response.ok) {
+                throw new Error(`${response.status}`);
+            }
+            return response.json();
+        },
+
+        decodeContent(base64) {
+            return new TextDecoder('utf-8').decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)));
+        }
+    },
+
     // --- UTILITY FUNCTIONS ---
     getErrorMessage(error) {
         const msg = error.message || '';
@@ -161,26 +185,14 @@ const TicketBuilderApp = {
         this.loadAppData();
     },
 
-    // --- GITHUB API ---
-    async githubApiFetch(endpoint) {
-        const url = `https://api.github.com/repos/${this.settings.repo}/contents/${endpoint}?ref=trunk`;
-        const response = await fetch(url, {
-            headers: { 'Authorization': `token ${this.settings.pat}`, 'Accept': 'application/vnd.github.v3+json' }
-        });
-        if (!response.ok) {
-            throw new Error(`${response.status}`);
-        }
-        return response.json();
-    },
-
     // --- MAIN APP LOGIC / CONTROLLER ---
     async loadAppData() {
         this.ui.setLoadingState(this.ui.elements.saveButton, true, 'Save Settings & Load');
         try {
             const [readmeData, modalitiesData, personasData] = await Promise.all([
-                this.githubApiFetch('tools/ticket-builder/README.md'),
-                this.githubApiFetch('modalities'),
-                this.githubApiFetch('personas')
+                this.api.fetchContent('tools/ticket-builder/README.md'),
+                this.api.fetchContent('modalities'),
+                this.api.fetchContent('personas')
             ]);
             this.ui.populateReadme(readmeData.content);
             this.ui.populateDropdown(modalitiesData);
@@ -203,8 +215,6 @@ const TicketBuilderApp = {
         this.ui.elements.copyButton.style.display = 'none';
 
         try {
-            const decode = (base64) => new TextDecoder('utf-8').decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)));
-
             const task = this.ui.getTaskInput();
             const context = this.ui.getContextInput();
             const modalityPath = this.ui.getModalityPath();
@@ -214,25 +224,25 @@ const TicketBuilderApp = {
             if (!knowledgePath) throw new Error("Ticket Context Path is required.");
 
             const fetchPromises = {
-                protocol: this.githubApiFetch(this.CORE_PROTOCOL_PATH),
-                modality: this.githubApiFetch(modalityPath),
-                personas: Promise.all(personaPaths.map(p => this.githubApiFetch(p))),
+                protocol: this.api.fetchContent(this.CORE_PROTOCOL_PATH),
+                modality: this.api.fetchContent(modalityPath),
+                personas: Promise.all(personaPaths.map(p => this.api.fetchContent(p))),
             };
 
-            const knowledgeFileHeaders = await this.githubApiFetch(knowledgePath);
+            const knowledgeFileHeaders = await this.api.fetchContent(knowledgePath);
             const filteredKnowledgeFiles = knowledgeFileHeaders.filter(f => f.name.toLowerCase() !== 'readme.md');
             if(filteredKnowledgeFiles.length === 0) {
                 this.ui.updateStatus('Warning: No knowledge files found. Ticket generated without them.', false);
             }
-            fetchPromises.knowledge = Promise.all(filteredKnowledgeFiles.map(f => this.githubApiFetch(f.path)));
+            fetchPromises.knowledge = Promise.all(filteredKnowledgeFiles.map(f => this.api.fetchContent(f.path)));
 
             const results = await Promise.all(Object.values(fetchPromises));
             const [protocolData, modalityData, personasData, knowledgeData] = results;
 
-            const protocolContent = decode(protocolData.content);
-            const modalityContent = decode(modalityData.content);
-            const personasContent = personasData.map(p => `--- PERSONA: ${p.name.replace('.md','')} ---\n${decode(p.content)}`).join('\n\n');
-            const knowledgeContent = knowledgeData.length > 0 ? knowledgeData.map((k, i) => `--- KNOWLEDGE: ${filteredKnowledgeFiles[i].name} ---\n${decode(k.content)}`).join('\n\n') : 'No knowledge files were provided for this ticket.';
+            const protocolContent = this.api.decodeContent(protocolData.content);
+            const modalityContent = this.api.decodeContent(modalityData.content);
+            const personasContent = personasData.map(p => `--- PERSONA: ${p.name.replace('.md','')} ---\n${this.api.decodeContent(p.content)}`).join('\n\n');
+            const knowledgeContent = knowledgeData.length > 0 ? knowledgeData.map((k, i) => `--- KNOWLEDGE: ${filteredKnowledgeFiles[i].name} ---\n${this.api.decodeContent(k.content)}`).join('\n\n') : 'No knowledge files were provided for this ticket.';
             const modalityName = this.ui.elements.modalitySelect.options[this.ui.elements.modalitySelect.selectedIndex].text;
 
             const finalTicket = `### TASK DEFINITION\n---\n**TASK:** ${task}\n**ADDITIONAL CONTEXT:** ${context}\n\n\n### CORE PROTOCOL\n---\n${protocolContent}\n\n\n### MODALITY: ${modalityName}\n---\n${modalityContent}\n\n\n### SELECTED PERSONAS\n---\n${personasContent}\n\n\n### CURATED KNOWLEDGE\n---\n${knowledgeContent}`.trim();
@@ -258,14 +268,15 @@ const TicketBuilderApp = {
 
     // --- App Initialization ---
     init() {
-        this.ui.init(); // Initialize the UI module first to cache elements
+        this.ui.init();
+        this.api.init(this.settings); // Initialize the API module with settings
 
         // Bind 'this' for event handlers to ensure they refer to TicketBuilderApp
         this.saveSettings = this.saveSettings.bind(this);
         this.handleGenerateTicket = this.handleGenerateTicket.bind(this);
         this.handleCopy = this.handleCopy.bind(this);
 
-        // Add event listeners using elements from the UI module
+        // Add event listeners
         this.ui.elements.saveButton.addEventListener('click', this.saveSettings);
         this.ui.elements.generateButton.addEventListener('click', this.handleGenerateTicket);
         this.ui.elements.copyButton.addEventListener('click', this.handleCopy);
