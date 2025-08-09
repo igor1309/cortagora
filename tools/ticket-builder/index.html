@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Blackchain Ticket Builder</title>
+</head>
+<body>
+
+    <main>
+        <!-- Section for Guiding Principles -->
+        <section id="principles-section">
+            <details>
+                <summary>Show/Hide Guiding Principles</summary>
+                <div id="readme-content">
+                    <!-- README.md content will be loaded here by JavaScript -->
+                    Loading principles...
+                </div>
+            </details>
+        </section>
+
+        <hr>
+
+        <!-- Section for GitHub Configuration -->
+        <section id="config-section">
+            <h3>Configuration</h3>
+            <label for="repo-path">GitHub Repo (owner/repo):</label>
+            <input type="text" id="repo-path" placeholder="e.g., my-username/my-secret-project">
+
+            <label for="github-pat">GitHub Personal Access Token:</label>
+            <input type="password" id="github-pat" placeholder="ghp_...">
+
+            <button id="save-button">Save Settings & Load</button>
+        </section>
+
+        <hr>
+
+        <!-- Section for Task Definition -->
+        <section id="task-section">
+            <h3>1. Define Task</h3>
+            <textarea id="task-input" rows="3" placeholder="Describe the core task... e.g., 'Invent a character past based on this story'"></textarea>
+            <textarea id="context-input" rows="3" placeholder="Provide any additional context or constraints..."></textarea>
+        </section>
+
+        <!-- Section for Component Selection -->
+        <section id="components-section">
+            <h3>2. Select Components</h3>
+
+            <label for="modality-select">Modality:</label>
+            <select id="modality-select">
+                <option>-- Load settings first --</option>
+            </select>
+
+            <label>Personas:</label>
+            <div id="personas-container">
+                <!-- Checkboxes will be loaded here by JavaScript -->
+                <p>-- Load settings first --</p>
+            </div>
+
+            <label for="knowledge-path">Ticket Context Path:</label>
+            <input type="text" id="knowledge-path" placeholder="e.g., semi-RAG/ticket-001-character-past">
+        </section>
+
+        <hr>
+
+        <!-- Section for Action -->
+        <section id="action-section">
+            <h3>3. Generate</h3>
+            <button id="generate-button">Generate Ticket</button>
+        </section>
+
+        <!-- Section for Output -->
+        <section id="output-section">
+            <h3>Result</h3>
+            <button id="copy-button" style="display: none;">Copy to Clipboard</button>
+            <pre><code id="output-code">-- Your generated ticket will appear here --</code></pre>
+        </section>
+
+        <!-- Section for Status Messages -->
+        <footer id="status-area">
+            <p>Status: Waiting for configuration.</p>
+        </footer>
+
+    </main>
+
+    <!-- JavaScript will be added here later -->
+
+</body>
+</html>
