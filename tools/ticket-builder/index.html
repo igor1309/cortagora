@@ -62,10 +62,26 @@
         }
 
         /* --- Forms & Inputs --- */
-        label, summary {
+        label {
             display: block;
             font-weight: 600;
             margin-bottom: 0.5rem;
+        }
+
+        /* NEW: Style for the <summary> element */
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            padding: 0.5rem;
+            background-color: var(--code-bg);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.2s ease;
+            outline: none; /* Removes focus ring in some browsers */
+        }
+
+        summary:hover {
+             filter: brightness(95%);
         }
 
         input[type="text"],
@@ -172,17 +188,17 @@
             <button id="save-button">Save Settings & Load</button>
         </section>
 
-        <hr>
+        <hr id="config-hr" style="display: none;"> <!-- NEW: A hideable HR -->
 
         <!-- Section for Task Definition -->
-        <section id="task-section">
+        <section id="task-section" style="display: none;">
             <h3>1. Define Task</h3>
             <textarea id="task-input" rows="3" placeholder="Describe the core task... e.g., 'Invent a character past based on this story'"></textarea>
             <textarea id="context-input" rows="3" placeholder="Provide any additional context or constraints..."></textarea>
         </section>
 
         <!-- Section for Component Selection -->
-        <section id="components-section">
+        <section id="components-section" style="display: none;">
             <h3>2. Select Components</h3>
 
             <label for="modality-select">Modality:</label>
@@ -200,16 +216,15 @@
             <input type="text" id="knowledge-path" placeholder="e.g., semi-RAG/ticket-001-character-past">
         </section>
 
-        <hr>
-
         <!-- Section for Action -->
-        <section id="action-section">
+        <section id="action-section" style="display: none;">
+            <hr>
             <h3>3. Generate</h3>
             <button id="generate-button" disabled>Generate Ticket</button>
         </section>
 
         <!-- Section for Output -->
-        <section id="output-section">
+        <section id="output-section" style="display: none;">
             <h3>Result</h3>
             <button id="copy-button" style="display: none;">Copy to Clipboard</button>
             <pre><code id="output-code">-- Your generated ticket will appear here --</code></pre>
@@ -225,6 +240,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- 1. DOM Element References ---
+            const configSection = document.getElementById('config-section'); // Ref to whole section
             const repoPathInput = document.getElementById('repo-path');
             const patInput = document.getElementById('github-pat');
             const saveButton = document.getElementById('save-button');
@@ -234,11 +250,29 @@
             const personasContainer = document.getElementById('personas-container');
             const generateButton = document.getElementById('generate-button');
 
+            // NEW: Refs to sections to show/hide
+            const configHr = document.getElementById('config-hr');
+            const taskSection = document.getElementById('task-section');
+            const componentsSection = document.getElementById('components-section');
+            const actionSection = document.getElementById('action-section');
+            const outputSection = document.getElementById('output-section');
+
+
             // --- 2. Configuration & State ---
             let settings = { repo: '', pat: '' };
 
             const updateStatus = (message, isError = false) => {
                 statusArea.innerHTML = `<p style="color: ${isError ? '#dc3545' : 'inherit'}">${message}</p>`;
+            };
+
+            const showMainApp = () => {
+                configSection.style.display = 'none'; // Hide config
+                configHr.style.display = 'none';
+                // Show the rest
+                taskSection.style.display = 'block';
+                componentsSection.style.display = 'block';
+                actionSection.style.display = 'block';
+                outputSection.style.display = 'block';
             };
 
             const loadSettings = () => {
@@ -251,6 +285,12 @@
                     settings.pat = savedPat;
                     updateStatus('Saved settings loaded. Ready to fetch data.');
                     loadAppData();
+                } else {
+                    // NEW: Ensure app is hidden if no settings
+                    taskSection.style.display = 'none';
+                    componentsSection.style.display = 'none';
+                    actionSection.style.display = 'none';
+                    outputSection.style.display = 'none';
                 }
             };
 
@@ -271,9 +311,7 @@
 
             // --- 3. GitHub API Communication ---
             const githubApiFetch = async (endpoint) => {
-                // --- THIS IS THE MODIFIED LINE ---
                 const url = `https://api.github.com/repos/${settings.repo}/contents/${endpoint}?ref=trunk`;
-                // --- END OF MODIFICATION ---
 
                 const response = await fetch(url, {
                     headers: {
@@ -292,13 +330,12 @@
                 readmeContent.textContent = atob(content); // Decode from Base64
             };
 
-
             const populateDropdown = (selectElement, files) => {
                 selectElement.innerHTML = ''; // Clear existing options
                 files.filter(file => file.name.endsWith('.md')).forEach(file => {
                     const option = document.createElement('option');
                     option.value = file.path;
-                    option.textContent = file.name.replace('.md', '');
+                    option.textContent = file.name.replace('.md', '').replace(/[\(\)\d]/g, '').trim(); // Clean up names
                     selectElement.appendChild(option);
                 });
             };
@@ -312,9 +349,11 @@
                     checkbox.type = 'checkbox';
                     checkbox.id = id;
                     checkbox.value = file.path;
+
                     const label = document.createElement('label');
                     label.htmlFor = id;
-                    label.textContent = file.name.replace('.md', '');
+                    label.textContent = file.name.replace('.md', '').replace('ПЕРСОНЫ', '').trim(); // Clean up names
+                    label.style.display = 'inline'; // Make label sit next to checkbox
 
                     wrapper.appendChild(checkbox);
                     wrapper.appendChild(label);
@@ -338,8 +377,9 @@
                     populateDropdown(modalitySelect, modalitiesData);
                     populateCheckboxes(personasContainer, personasData);
 
-                    generateButton.disabled = false; // Enable ticket generation
+                    generateButton.disabled = false;
                     updateStatus('Application ready. All components loaded successfully.');
+                    showMainApp(); // <-- HIDE CONFIG AND SHOW THE APP
 
                 } catch (error) {
                     console.error('Failed to load app data:', error);
