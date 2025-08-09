@@ -271,7 +271,10 @@
 
             // --- 3. GitHub API Communication ---
             const githubApiFetch = async (endpoint) => {
-                const url = `https://api.github.com/repos/${settings.repo}/contents/${endpoint}`;
+                // --- THIS IS THE MODIFIED LINE ---
+                const url = `https://api.github.com/repos/${settings.repo}/contents/${endpoint}?ref=trunk`;
+                // --- END OF MODIFICATION ---
+
                 const response = await fetch(url, {
                     headers: {
                         'Authorization': `token ${settings.pat}`,
