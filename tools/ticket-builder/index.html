@@ -289,7 +289,7 @@
             // --- 2. Configuration & State ---
             let settings = { repo: '', pat: '' };
 
-            // --- UTILITY FUNCTIONS from review.md ---
+            // --- UTILITY FUNCTIONS ---
             const getErrorMessage = (error) => {
                 const msg = error.message || '';
                 if (msg.includes('401')) return 'Error 401: Invalid GitHub token. Please check your Personal Access Token and its permissions.';
@@ -423,6 +423,17 @@
                 copyButton.style.display = 'none';
 
                 try {
+                    // --- THIS IS THE DECODING FIX ---
+                    const decode = (base64) => {
+                        const binaryString = atob(base64);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        return new TextDecoder('utf-8').decode(bytes);
+                    };
+                    // --- END OF FIX ---
+
                     const task = taskInput.value;
                     const context = contextInput.value;
                     const modalityPath = modalitySelect.value;
@@ -446,7 +457,6 @@
                     const results = await Promise.all(Object.values(fetchPromises));
                     const [protocolData, modalityData, personasData, knowledgeData] = results;
 
-                    const decode = (b64) => atob(b64);
                     const protocolContent = decode(protocolData.content);
                     const modalityContent = decode(modalityData.content);
                     const personasContent = personasData.map(p => `--- PERSONA: ${p.name.replace('.md','')} ---\n${decode(p.content)}`).join('\n\n');
