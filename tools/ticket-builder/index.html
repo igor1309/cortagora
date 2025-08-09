@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cortagora Ticket Builder</title>
+    <!-- NEW: Include the marked.js library for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* --- General & Layout --- */
         :root {
@@ -98,6 +100,18 @@
             margin-bottom: 1rem;
         }
 
+        /* NEW: Custom styling for the select dropdown */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1em;
+            padding-right: 2.5rem;
+        }
+
         textarea {
             resize: vertical;
         }
@@ -145,6 +159,15 @@
             border-radius: 4px;
             white-space: pre-wrap;
             word-wrap: break-word;
+        }
+
+        /* NEW: Styles for rendered Markdown in the principles section */
+        #readme-content h3 {
+            border-bottom: none; /* Override default h3 style */
+        }
+        #readme-content p, #readme-content ul, #readme-content ol {
+            margin-top: 0;
+            margin-bottom: 1rem;
         }
 
         #output-code {
@@ -310,12 +333,13 @@
 
             // --- 4. UI Population ---
             const populateReadme = (content) => {
-                readmeContent.textContent = atob(content);
+                // MODIFIED: Use marked.js to parse Markdown to HTML
+                // This is safe because the content comes from your own private repository.
+                readmeContent.innerHTML = marked.parse(atob(content));
             };
 
             const populateDropdown = (selectElement, files) => {
                 selectElement.innerHTML = '';
-                // MODIFIED: Added check to ignore README.md
                 files.filter(file => file.name.endsWith('.md') && file.name.toLowerCase() !== 'readme.md')
                      .forEach(file => {
                         const option = document.createElement('option');
@@ -327,7 +351,6 @@
 
             const populateCheckboxes = (container, files) => {
                 container.innerHTML = '';
-                // MODIFIED: Added check to ignore README.md
                 files.filter(file => file.name.endsWith('.md') && file.name.toLowerCase() !== 'readme.md')
                      .forEach(file => {
                         const id = `cb-${file.sha}`;
@@ -401,7 +424,6 @@
                     fetchPromises.personas = Promise.all(personaPaths.map(path => githubApiFetch(path)));
 
                     const knowledgeFileHeaders = await githubApiFetch(knowledgePath);
-                    // MODIFIED: Added check to ignore README.md in the knowledge folder
                     const filteredKnowledgeFiles = knowledgeFileHeaders.filter(file => file.name.toLowerCase() !== 'readme.md');
                     fetchPromises.knowledge = Promise.all(filteredKnowledgeFiles.map(file => githubApiFetch(file.path)));
 
@@ -412,7 +434,6 @@
                     const protocolContent = decode(protocolData.content);
                     const modalityContent = decode(modalityData.content);
                     const personasContent = personasData.map(p => `--- PERSONA: ${p.name.replace('.md','')} ---\n${decode(p.content)}`).join('\n\n');
-                    // MODIFIED: Use the filtered list for correct naming
                     const knowledgeContent = knowledgeData.map((k, index) => `--- KNOWLEDGE: ${filteredKnowledgeFiles[index].name} ---\n${decode(k.content)}`).join('\n\n');
 
                     const finalTicket = `
