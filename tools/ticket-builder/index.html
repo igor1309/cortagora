@@ -68,7 +68,6 @@
             margin-bottom: 0.5rem;
         }
 
-        /* NEW: Style for the <summary> element */
         summary {
             cursor: pointer;
             font-weight: 600;
@@ -77,7 +76,7 @@
             border-radius: 4px;
             margin-bottom: 0.5rem;
             transition: background-color 0.2s ease;
-            outline: none; /* Removes focus ring in some browsers */
+            outline: none;
         }
 
         summary:hover {
@@ -95,7 +94,7 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             font-size: 1rem;
-            box-sizing: border-box; /* Important for 100% width */
+            box-sizing: border-box;
             margin-bottom: 1rem;
         }
 
@@ -105,6 +104,7 @@
 
         input[type="checkbox"] {
             margin-right: 0.5rem;
+            vertical-align: middle;
         }
 
         button {
@@ -133,17 +133,22 @@
             color: #6c757d;
         }
 
+        #personas-container label {
+             display: inline-block;
+             font-weight: normal;
+        }
+
         /* --- Specific Elements --- */
         #readme-content, #output-code {
             background-color: var(--code-bg);
             padding: 1rem;
             border-radius: 4px;
-            white-space: pre-wrap; /* Wrap long lines */
+            white-space: pre-wrap;
             word-wrap: break-word;
         }
 
         #output-code {
-            display: block; /* Make the code block fill its container */
+            display: block;
         }
 
         #copy-button {
@@ -167,10 +172,7 @@
         <section id="principles-section">
             <details>
                 <summary>Show/Hide Guiding Principles</summary>
-                <div id="readme-content">
-                    <!-- README.md content will be loaded here by JavaScript -->
-                    Loading principles...
-                </div>
+                <div id="readme-content">Loading principles...</div>
             </details>
         </section>
 
@@ -188,59 +190,51 @@
             <button id="save-button">Save Settings & Load</button>
         </section>
 
-        <hr id="config-hr" style="display: none;"> <!-- NEW: A hideable HR -->
+        <hr id="config-hr" style="display: none;">
 
-        <!-- Section for Task Definition -->
-        <section id="task-section" style="display: none;">
-            <h3>1. Define Task</h3>
-            <textarea id="task-input" rows="3" placeholder="Describe the core task... e.g., 'Invent a character past based on this story'"></textarea>
-            <textarea id="context-input" rows="3" placeholder="Provide any additional context or constraints..."></textarea>
-        </section>
+        <!-- Main App Sections (Initially Hidden) -->
+        <div id="main-app-container" style="display: none;">
+            <section id="task-section">
+                <h3>1. Define Task</h3>
+                <textarea id="task-input" rows="3" placeholder="Describe the core task... e.g., 'Invent a character past based on this story'"></textarea>
+                <textarea id="context-input" rows="3" placeholder="Provide any additional context or constraints..."></textarea>
+            </section>
 
-        <!-- Section for Component Selection -->
-        <section id="components-section" style="display: none;">
-            <h3>2. Select Components</h3>
+            <section id="components-section">
+                <h3>2. Select Components</h3>
 
-            <label for="modality-select">Modality:</label>
-            <select id="modality-select">
-                <option>-- Load settings first --</option>
-            </select>
+                <label for="modality-select">Modality:</label>
+                <select id="modality-select"><option>-- Load settings first --</option></select>
 
-            <label>Personas:</label>
-            <div id="personas-container">
-                <!-- Checkboxes will be loaded here by JavaScript -->
-                <p>-- Load settings first --</p>
-            </div>
+                <label>Personas:</label>
+                <div id="personas-container"><p>-- Load settings first --</p></div>
 
-            <label for="knowledge-path">Ticket Context Path:</label>
-            <input type="text" id="knowledge-path" placeholder="e.g., semi-RAG/ticket-001-character-past">
-        </section>
+                <label for="knowledge-path">Ticket Context Path:</label>
+                <input type="text" id="knowledge-path" placeholder="e.g., semi-RAG/ticket-001-character-past">
+            </section>
 
-        <!-- Section for Action -->
-        <section id="action-section" style="display: none;">
-            <hr>
-            <h3>3. Generate</h3>
-            <button id="generate-button" disabled>Generate Ticket</button>
-        </section>
+            <section id="action-section">
+                <hr>
+                <h3>3. Generate</h3>
+                <button id="generate-button" disabled>Generate Ticket</button>
+            </section>
 
-        <!-- Section for Output -->
-        <section id="output-section" style="display: none;">
-            <h3>Result</h3>
-            <button id="copy-button" style="display: none;">Copy to Clipboard</button>
-            <pre><code id="output-code">-- Your generated ticket will appear here --</code></pre>
-        </section>
+            <section id="output-section">
+                <h3>Result</h3>
+                <button id="copy-button" style="display: none;">Copy to Clipboard</button>
+                <pre><code id="output-code">-- Your generated ticket will appear here --</code></pre>
+            </section>
+        </div>
 
-        <!-- Section for Status Messages -->
         <footer id="status-area">
             <p>Status: Waiting for configuration.</p>
         </footer>
-
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- 1. DOM Element References ---
-            const configSection = document.getElementById('config-section'); // Ref to whole section
+            const configSection = document.getElementById('config-section');
             const repoPathInput = document.getElementById('repo-path');
             const patInput = document.getElementById('github-pat');
             const saveButton = document.getElementById('save-button');
@@ -249,14 +243,15 @@
             const modalitySelect = document.getElementById('modality-select');
             const personasContainer = document.getElementById('personas-container');
             const generateButton = document.getElementById('generate-button');
-
-            // NEW: Refs to sections to show/hide
+            const mainAppContainer = document.getElementById('main-app-container');
             const configHr = document.getElementById('config-hr');
-            const taskSection = document.getElementById('task-section');
-            const componentsSection = document.getElementById('components-section');
-            const actionSection = document.getElementById('action-section');
-            const outputSection = document.getElementById('output-section');
 
+            // Input refs for generation
+            const taskInput = document.getElementById('task-input');
+            const contextInput = document.getElementById('context-input');
+            const knowledgePathInput = document.getElementById('knowledge-path');
+            const outputCode = document.getElementById('output-code');
+            const copyButton = document.getElementById('copy-button');
 
             // --- 2. Configuration & State ---
             let settings = { repo: '', pat: '' };
@@ -266,13 +261,9 @@
             };
 
             const showMainApp = () => {
-                configSection.style.display = 'none'; // Hide config
+                configSection.style.display = 'none';
                 configHr.style.display = 'none';
-                // Show the rest
-                taskSection.style.display = 'block';
-                componentsSection.style.display = 'block';
-                actionSection.style.display = 'block';
-                outputSection.style.display = 'block';
+                mainAppContainer.style.display = 'block';
             };
 
             const loadSettings = () => {
@@ -285,12 +276,6 @@
                     settings.pat = savedPat;
                     updateStatus('Saved settings loaded. Ready to fetch data.');
                     loadAppData();
-                } else {
-                    // NEW: Ensure app is hidden if no settings
-                    taskSection.style.display = 'none';
-                    componentsSection.style.display = 'none';
-                    actionSection.style.display = 'none';
-                    outputSection.style.display = 'none';
                 }
             };
 
@@ -312,7 +297,6 @@
             // --- 3. GitHub API Communication ---
             const githubApiFetch = async (endpoint) => {
                 const url = `https://api.github.com/repos/${settings.repo}/contents/${endpoint}?ref=trunk`;
-
                 const response = await fetch(url, {
                     headers: {
                         'Authorization': `token ${settings.pat}`,
@@ -327,21 +311,21 @@
 
             // --- 4. UI Population ---
             const populateReadme = (content) => {
-                readmeContent.textContent = atob(content); // Decode from Base64
+                readmeContent.textContent = atob(content);
             };
 
             const populateDropdown = (selectElement, files) => {
-                selectElement.innerHTML = ''; // Clear existing options
+                selectElement.innerHTML = '';
                 files.filter(file => file.name.endsWith('.md')).forEach(file => {
                     const option = document.createElement('option');
                     option.value = file.path;
-                    option.textContent = file.name.replace('.md', '').replace(/[\(\)\d]/g, '').trim(); // Clean up names
+                    option.textContent = file.name.replace('.md', '').replace(/[\(\)\d]/g, '').trim();
                     selectElement.appendChild(option);
                 });
             };
 
             const populateCheckboxes = (container, files) => {
-                container.innerHTML = ''; // Clear existing content
+                container.innerHTML = '';
                 files.filter(file => file.name.endsWith('.md')).forEach(file => {
                     const id = `cb-${file.sha}`;
                     const wrapper = document.createElement('div');
@@ -352,8 +336,7 @@
 
                     const label = document.createElement('label');
                     label.htmlFor = id;
-                    label.textContent = file.name.replace('.md', '').replace('ПЕРСОНЫ', '').trim(); // Clean up names
-                    label.style.display = 'inline'; // Make label sit next to checkbox
+                    label.textContent = file.name.replace('.md', '').replace('ПЕРСОНЫ', '').trim();
 
                     wrapper.appendChild(checkbox);
                     wrapper.appendChild(label);
@@ -379,7 +362,7 @@
 
                     generateButton.disabled = false;
                     updateStatus('Application ready. All components loaded successfully.');
-                    showMainApp(); // <-- HIDE CONFIG AND SHOW THE APP
+                    showMainApp();
 
                 } catch (error) {
                     console.error('Failed to load app data:', error);
@@ -390,8 +373,102 @@
                 }
             };
 
-            // --- 6. Event Listeners ---
+            // --- 6. TICKET GENERATION LOGIC ---
+            const handleGenerateTicket = async () => {
+                updateStatus('Generating ticket...');
+                generateButton.disabled = true;
+                outputCode.textContent = 'Fetching components...';
+                copyButton.style.display = 'none';
+
+                try {
+                    // --- Gather all inputs ---
+                    const task = taskInput.value;
+                    const context = contextInput.value;
+                    const modalityPath = modalitySelect.value;
+                    const selectedPersonaCheckboxes = document.querySelectorAll('#personas-container input:checked');
+                    const personaPaths = Array.from(selectedPersonaCheckboxes).map(cb => cb.value);
+                    const knowledgePath = knowledgePathInput.value.trim();
+
+                    if (!knowledgePath) {
+                        throw new Error("Ticket Context Path is required.");
+                    }
+
+                    // --- Create fetch promises for all components ---
+                    const fetchPromises = {};
+                    fetchPromises.protocol = githubApiFetch('protocols/CORE_PROTOCOL.md');
+                    fetchPromises.modality = githubApiFetch(modalityPath);
+                    fetchPromises.personas = Promise.all(personaPaths.map(path => githubApiFetch(path)));
+
+                    // First, get the list of files in the knowledge folder
+                    const knowledgeFileHeaders = await githubApiFetch(knowledgePath);
+                    // Then, create promises to fetch each of those files
+                    fetchPromises.knowledge = Promise.all(knowledgeFileHeaders.map(file => githubApiFetch(file.path)));
+
+                    // --- Fetch all content in parallel ---
+                    const results = await Promise.all(Object.values(fetchPromises));
+                    const [protocolData, modalityData, personasData, knowledgeData] = results;
+
+                    // --- Decode and assemble the final ticket string ---
+                    const decode = (base64) => atob(base64);
+                    const protocolContent = decode(protocolData.content);
+                    const modalityContent = decode(modalityData.content);
+                    const personasContent = personasData.map(p => `--- PERSONA: ${p.name.replace('.md','')} ---\n${decode(p.content)}`).join('\n\n');
+                    const knowledgeContent = knowledgeData.map(k => `--- KNOWLEDGE: ${k.name} ---\n${decode(k.content)}`).join('\n\n');
+
+                    const finalTicket = `
+### TASK DEFINITION
+---
+**TASK:** ${task}
+**ADDITIONAL CONTEXT:** ${context}
+
+
+### CORE PROTOCOL
+---
+${protocolContent}
+
+
+### MODALITY: ${modalitySelect.options[modalitySelect.selectedIndex].text}
+---
+${modalityContent}
+
+
+### SELECTED PERSONAS
+---
+${personasContent}
+
+
+### CURATED KNOWLEDGE
+---
+${knowledgeContent}
+`.trim();
+
+                    outputCode.textContent = finalTicket;
+                    copyButton.style.display = 'inline-block';
+                    updateStatus('Ticket generated successfully!');
+
+                } catch (error) {
+                    console.error('Failed to generate ticket:', error);
+                    updateStatus(error.message, true);
+                    outputCode.textContent = `Error: ${error.message}`;
+                } finally {
+                    generateButton.disabled = false;
+                }
+            };
+
+            const handleCopy = () => {
+                navigator.clipboard.writeText(outputCode.textContent).then(() => {
+                    copyButton.textContent = 'Copied!';
+                    setTimeout(() => { copyButton.textContent = 'Copy to Clipboard'; }, 2000);
+                }).catch(err => {
+                    updateStatus('Failed to copy text.', true);
+                    console.error('Copy failed:', err);
+                });
+            };
+
+            // --- 7. Event Listeners ---
             saveButton.addEventListener('click', saveSettings);
+            generateButton.addEventListener('click', handleGenerateTicket);
+            copyButton.addEventListener('click', handleCopy);
 
             // --- Initial Load ---
             loadSettings();
