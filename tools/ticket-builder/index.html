@@ -87,6 +87,10 @@
             resize: vertical;
         }
 
+        input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
         button {
             background-color: var(--primary-color);
             color: var(--container-bg);
@@ -101,6 +105,11 @@
 
         button:hover {
             opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         #personas-container p {
@@ -196,7 +205,7 @@
         <!-- Section for Action -->
         <section id="action-section">
             <h3>3. Generate</h3>
-            <button id="generate-button">Generate Ticket</button>
+            <button id="generate-button" disabled>Generate Ticket</button>
         </section>
 
         <!-- Section for Output -->
@@ -213,7 +222,137 @@
 
     </main>
 
-    <!-- JavaScript will be added here later -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. DOM Element References ---
+            const repoPathInput = document.getElementById('repo-path');
+            const patInput = document.getElementById('github-pat');
+            const saveButton = document.getElementById('save-button');
+            const statusArea = document.getElementById('status-area');
+            const readmeContent = document.getElementById('readme-content');
+            const modalitySelect = document.getElementById('modality-select');
+            const personasContainer = document.getElementById('personas-container');
+            const generateButton = document.getElementById('generate-button');
 
+            // --- 2. Configuration & State ---
+            let settings = { repo: '', pat: '' };
+
+            const updateStatus = (message, isError = false) => {
+                statusArea.innerHTML = `<p style="color: ${isError ? '#dc3545' : 'inherit'}">${message}</p>`;
+            };
+
+            const loadSettings = () => {
+                const savedRepo = localStorage.getItem('cortagora_repo');
+                const savedPat = localStorage.getItem('cortagora_pat');
+                if (savedRepo && savedPat) {
+                    repoPathInput.value = savedRepo;
+                    patInput.value = savedPat;
+                    settings.repo = savedRepo;
+                    settings.pat = savedPat;
+                    updateStatus('Saved settings loaded. Ready to fetch data.');
+                    loadAppData();
+                }
+            };
+
+            const saveSettings = () => {
+                const repo = repoPathInput.value.trim();
+                const pat = patInput.value.trim();
+                if (!repo || !pat) {
+                    updateStatus('Error: Both repository path and PAT are required.', true);
+                    return;
+                }
+                settings.repo = repo;
+                settings.pat = pat;
+                localStorage.setItem('cortagora_repo', repo);
+                localStorage.setItem('cortagora_pat', pat);
+                updateStatus('Settings saved. Loading data from repository...');
+                loadAppData();
+            };
+
+            // --- 3. GitHub API Communication ---
+            const githubApiFetch = async (endpoint) => {
+                const url = `https://api.github.com/repos/${settings.repo}/contents/${endpoint}`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${settings.pat}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`GitHub API Error for ${endpoint}: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            };
+
+            // --- 4. UI Population ---
+            const populateReadme = (content) => {
+                readmeContent.textContent = atob(content); // Decode from Base64
+            };
+
+
+            const populateDropdown = (selectElement, files) => {
+                selectElement.innerHTML = ''; // Clear existing options
+                files.filter(file => file.name.endsWith('.md')).forEach(file => {
+                    const option = document.createElement('option');
+                    option.value = file.path;
+                    option.textContent = file.name.replace('.md', '');
+                    selectElement.appendChild(option);
+                });
+            };
+
+            const populateCheckboxes = (container, files) => {
+                container.innerHTML = ''; // Clear existing content
+                files.filter(file => file.name.endsWith('.md')).forEach(file => {
+                    const id = `cb-${file.sha}`;
+                    const wrapper = document.createElement('div');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = id;
+                    checkbox.value = file.path;
+                    const label = document.createElement('label');
+                    label.htmlFor = id;
+                    label.textContent = file.name.replace('.md', '');
+
+                    wrapper.appendChild(checkbox);
+                    wrapper.appendChild(label);
+                    container.appendChild(wrapper);
+                });
+            };
+
+            // --- 5. Main Data Loading Function ---
+            const loadAppData = async () => {
+                updateStatus('Loading data from GitHub...');
+                saveButton.disabled = true;
+
+                try {
+                    const [readmeData, modalitiesData, personasData] = await Promise.all([
+                        githubApiFetch('tools/ticket-builder/README.md'),
+                        githubApiFetch('modalities'),
+                        githubApiFetch('personas')
+                    ]);
+
+                    populateReadme(readmeData.content);
+                    populateDropdown(modalitySelect, modalitiesData);
+                    populateCheckboxes(personasContainer, personasData);
+
+                    generateButton.disabled = false; // Enable ticket generation
+                    updateStatus('Application ready. All components loaded successfully.');
+
+                } catch (error) {
+                    console.error('Failed to load app data:', error);
+                    updateStatus(error.message, true);
+                    generateButton.disabled = true;
+                } finally {
+                    saveButton.disabled = false;
+                }
+            };
+
+            // --- 6. Event Listeners ---
+            saveButton.addEventListener('click', saveSettings);
+
+            // --- Initial Load ---
+            loadSettings();
+        });
+    </script>
 </body>
 </html>
