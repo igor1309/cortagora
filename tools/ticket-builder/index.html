@@ -246,7 +246,6 @@
             const mainAppContainer = document.getElementById('main-app-container');
             const configHr = document.getElementById('config-hr');
 
-            // Input refs for generation
             const taskInput = document.getElementById('task-input');
             const contextInput = document.getElementById('context-input');
             const knowledgePathInput = document.getElementById('knowledge-path');
@@ -316,31 +315,35 @@
 
             const populateDropdown = (selectElement, files) => {
                 selectElement.innerHTML = '';
-                files.filter(file => file.name.endsWith('.md')).forEach(file => {
-                    const option = document.createElement('option');
-                    option.value = file.path;
-                    option.textContent = file.name.replace('.md', '').replace(/[\(\)\d]/g, '').trim();
-                    selectElement.appendChild(option);
+                // MODIFIED: Added check to ignore README.md
+                files.filter(file => file.name.endsWith('.md') && file.name.toLowerCase() !== 'readme.md')
+                     .forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file.path;
+                        option.textContent = file.name.replace('.md', '').replace(/[\(\)\d]/g, '').trim();
+                        selectElement.appendChild(option);
                 });
             };
 
             const populateCheckboxes = (container, files) => {
                 container.innerHTML = '';
-                files.filter(file => file.name.endsWith('.md')).forEach(file => {
-                    const id = `cb-${file.sha}`;
-                    const wrapper = document.createElement('div');
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = id;
-                    checkbox.value = file.path;
+                // MODIFIED: Added check to ignore README.md
+                files.filter(file => file.name.endsWith('.md') && file.name.toLowerCase() !== 'readme.md')
+                     .forEach(file => {
+                        const id = `cb-${file.sha}`;
+                        const wrapper = document.createElement('div');
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = id;
+                        checkbox.value = file.path;
 
-                    const label = document.createElement('label');
-                    label.htmlFor = id;
-                    label.textContent = file.name.replace('.md', '').replace('ПЕРСОНЫ', '').trim();
+                        const label = document.createElement('label');
+                        label.htmlFor = id;
+                        label.textContent = file.name.replace('.md', '').replace('ПЕРСОНЫ', '').trim();
 
-                    wrapper.appendChild(checkbox);
-                    wrapper.appendChild(label);
-                    container.appendChild(wrapper);
+                        wrapper.appendChild(checkbox);
+                        wrapper.appendChild(label);
+                        container.appendChild(wrapper);
                 });
             };
 
@@ -381,7 +384,6 @@
                 copyButton.style.display = 'none';
 
                 try {
-                    // --- Gather all inputs ---
                     const task = taskInput.value;
                     const context = contextInput.value;
                     const modalityPath = modalitySelect.value;
@@ -393,27 +395,25 @@
                         throw new Error("Ticket Context Path is required.");
                     }
 
-                    // --- Create fetch promises for all components ---
                     const fetchPromises = {};
                     fetchPromises.protocol = githubApiFetch('protocols/CORE_PROTOCOL.md');
                     fetchPromises.modality = githubApiFetch(modalityPath);
                     fetchPromises.personas = Promise.all(personaPaths.map(path => githubApiFetch(path)));
 
-                    // First, get the list of files in the knowledge folder
                     const knowledgeFileHeaders = await githubApiFetch(knowledgePath);
-                    // Then, create promises to fetch each of those files
-                    fetchPromises.knowledge = Promise.all(knowledgeFileHeaders.map(file => githubApiFetch(file.path)));
+                    // MODIFIED: Added check to ignore README.md in the knowledge folder
+                    const filteredKnowledgeFiles = knowledgeFileHeaders.filter(file => file.name.toLowerCase() !== 'readme.md');
+                    fetchPromises.knowledge = Promise.all(filteredKnowledgeFiles.map(file => githubApiFetch(file.path)));
 
-                    // --- Fetch all content in parallel ---
                     const results = await Promise.all(Object.values(fetchPromises));
                     const [protocolData, modalityData, personasData, knowledgeData] = results;
 
-                    // --- Decode and assemble the final ticket string ---
                     const decode = (base64) => atob(base64);
                     const protocolContent = decode(protocolData.content);
                     const modalityContent = decode(modalityData.content);
                     const personasContent = personasData.map(p => `--- PERSONA: ${p.name.replace('.md','')} ---\n${decode(p.content)}`).join('\n\n');
-                    const knowledgeContent = knowledgeData.map(k => `--- KNOWLEDGE: ${k.name} ---\n${decode(k.content)}`).join('\n\n');
+                    // MODIFIED: Use the filtered list for correct naming
+                    const knowledgeContent = knowledgeData.map((k, index) => `--- KNOWLEDGE: ${filteredKnowledgeFiles[index].name} ---\n${decode(k.content)}`).join('\n\n');
 
                     const finalTicket = `
 ### TASK DEFINITION
