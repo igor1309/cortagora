@@ -161,19 +161,15 @@
             word-wrap: break-word;
         }
 
-        /* --- MODIFIED: THE DEFINITIVE CSS FIX FOR MARKDOWN SPACING --- */
         #readme-content > * {
-            /* Forcibly reset margins and padding on all direct children */
             margin: 0 0 12px 0 !important;
             padding: 0 !important;
             line-height: 1.5 !important;
         }
         #readme-content ul, #readme-content ol {
-            /* Restore list indentation */
             padding-left: 20px !important;
         }
         #readme-content > *:last-child {
-            /* Remove margin from the very last element */
             margin-bottom: 0 !important;
         }
         #readme-content h1, #readme-content h2, #readme-content h3 {
@@ -182,8 +178,6 @@
              font-size: 1.1em !important;
              font-weight: 600 !important;
         }
-        /* --- END OF MODIFIED CSS BLOCK --- */
-
 
         #output-code {
             display: block;
@@ -219,11 +213,11 @@
         <!-- Section for GitHub Configuration -->
         <section id="config-section">
             <h3>Configuration</h3>
-            <label for="repo-path">GitHub Repo (owner/repo):</label>
-            <input type="text" id="repo-path" placeholder="e.g., my-username/cortagora-project">
+            <label for="repo-path" id="repo-label">GitHub Repo (owner/repo):</label>
+            <input type="text" id="repo-path" aria-labelledby="repo-label" aria-required="true" placeholder="e.g., my-username/cortagora-project">
 
-            <label for="github-pat">GitHub Personal Access Token:</label>
-            <input type="password" id="github-pat" placeholder="ghp_...">
+            <label for="github-pat" id="pat-label">GitHub Personal Access Token:</label>
+            <input type="password" id="github-pat" aria-labelledby="pat-label" aria-required="true" placeholder="ghp_...">
 
             <button id="save-button">Save Settings & Load</button>
         </section>
@@ -271,6 +265,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- CONSTANTS ---
+            const CORE_PROTOCOL_PATH = 'protocols/CORE_PROTOCOL.md';
+
             // --- 1. DOM Element References ---
             const configSection = document.getElementById('config-section');
             const repoPathInput = document.getElementById('repo-path');
@@ -283,7 +280,6 @@
             const generateButton = document.getElementById('generate-button');
             const mainAppContainer = document.getElementById('main-app-container');
             const configHr = document.getElementById('config-hr');
-
             const taskInput = document.getElementById('task-input');
             const contextInput = document.getElementById('context-input');
             const knowledgePathInput = document.getElementById('knowledge-path');
@@ -292,6 +288,25 @@
 
             // --- 2. Configuration & State ---
             let settings = { repo: '', pat: '' };
+
+            // --- UTILITY FUNCTIONS from review.md ---
+            const getErrorMessage = (error) => {
+                const msg = error.message || '';
+                if (msg.includes('401')) return 'Error 401: Invalid GitHub token. Please check your Personal Access Token and its permissions.';
+                if (msg.includes('404')) return 'Error 404: A file or directory was not found. Please check your paths (e.g., repo path, context path).';
+                if (msg.includes('Failed to fetch')) return 'Network Error: Failed to connect to GitHub. Please check your internet connection.';
+                return `An unexpected error occurred: ${msg}`;
+            };
+
+            const setLoadingState = (button, isLoading, originalText) => {
+                button.disabled = isLoading;
+                button.textContent = isLoading ? 'Loading...' : originalText;
+            };
+
+            const validateRepoPath = (repo) => {
+                const pattern = /^[a-zA-Z0-9-._]+\/[a-zA-Z0-9-._]+$/;
+                return pattern.test(repo);
+            };
 
             const updateStatus = (message, isError = false) => {
                 statusArea.innerHTML = `<p style="color: ${isError ? '#dc3545' : 'inherit'}">${message}</p>`;
@@ -311,7 +326,7 @@
                     patInput.value = savedPat;
                     settings.repo = savedRepo;
                     settings.pat = savedPat;
-                    updateStatus('Saved settings loaded. Ready to fetch data.');
+                    updateStatus('Saved settings loaded. Fetching data...');
                     loadAppData();
                 }
             };
@@ -319,15 +334,21 @@
             const saveSettings = () => {
                 const repo = repoPathInput.value.trim();
                 const pat = patInput.value.trim();
-                if (!repo || !pat) {
-                    updateStatus('Error: Both repository path and PAT are required.', true);
+
+                if (!validateRepoPath(repo)) {
+                    updateStatus('Error: Invalid repository format. Please use "owner/repo".', true);
                     return;
                 }
+                if (!pat) {
+                    updateStatus('Error: Personal Access Token is required.', true);
+                    return;
+                }
+
                 settings.repo = repo;
                 settings.pat = pat;
                 localStorage.setItem('cortagora_repo', repo);
                 localStorage.setItem('cortagora_pat', pat);
-                updateStatus('Settings saved. Loading data from repository...');
+                updateStatus('Settings saved. Loading data...');
                 loadAppData();
             };
 
@@ -335,87 +356,69 @@
             const githubApiFetch = async (endpoint) => {
                 const url = `https://api.github.com/repos/${settings.repo}/contents/${endpoint}?ref=trunk`;
                 const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${settings.pat}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
+                    headers: { 'Authorization': `token ${settings.pat}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
                 if (!response.ok) {
-                    throw new Error(`GitHub API Error for ${endpoint}: ${response.status} ${response.statusText}`);
+                    throw new Error(`${response.status}`);
                 }
                 return response.json();
             };
 
             // --- 4. UI Population ---
-            const populateReadme = (content) => {
-                readmeContent.innerHTML = marked.parse(atob(content));
-            };
-
-            const populateDropdown = (selectElement, files) => {
-                selectElement.innerHTML = '';
-                files.filter(file => file.name.endsWith('.md') && file.name.toLowerCase() !== 'readme.md')
-                     .forEach(file => {
-                        const option = document.createElement('option');
-                        option.value = file.path;
-                        option.textContent = file.name.replace('.md', '').replace(/[\(\)\d]/g, '').trim();
-                        selectElement.appendChild(option);
+            const populateReadme = (content) => { readmeContent.innerHTML = marked.parse(atob(content)); };
+            const populateDropdown = (select, files) => {
+                select.innerHTML = '';
+                files.filter(f => f.name.endsWith('.md') && f.name.toLowerCase() !== 'readme.md')
+                     .forEach(f => {
+                        const opt = document.createElement('option');
+                        opt.value = f.path;
+                        opt.textContent = f.name.replace('.md', '').replace(/[\(\)\d]/g, '').trim();
+                        select.appendChild(opt);
                 });
             };
-
             const populateCheckboxes = (container, files) => {
                 container.innerHTML = '';
-                files.filter(file => file.name.endsWith('.md') && file.name.toLowerCase() !== 'readme.md')
-                     .forEach(file => {
-                        const id = `cb-${file.sha}`;
-                        const wrapper = document.createElement('div');
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.id = id;
-                        checkbox.value = file.path;
-
-                        const label = document.createElement('label');
-                        label.htmlFor = id;
-                        label.textContent = file.name.replace('.md', '').replace('ПЕРСОНЫ', '').trim();
-
-                        wrapper.appendChild(checkbox);
-                        wrapper.appendChild(label);
-                        container.appendChild(wrapper);
+                files.filter(f => f.name.endsWith('.md') && f.name.toLowerCase() !== 'readme.md')
+                     .forEach(f => {
+                        const id = `cb-${f.sha}`;
+                        const wrap = document.createElement('div');
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox'; cb.id = id; cb.value = f.path;
+                        const lbl = document.createElement('label');
+                        lbl.htmlFor = id;
+                        lbl.textContent = f.name.replace('.md', '').replace('ПЕРСОНЫ', '').trim();
+                        wrap.append(cb, lbl);
+                        container.appendChild(wrap);
                 });
             };
 
             // --- 5. Main Data Loading Function ---
             const loadAppData = async () => {
-                updateStatus('Loading data from GitHub...');
-                saveButton.disabled = true;
-
+                setLoadingState(saveButton, true, 'Save Settings & Load');
                 try {
                     const [readmeData, modalitiesData, personasData] = await Promise.all([
                         githubApiFetch('tools/ticket-builder/README.md'),
                         githubApiFetch('modalities'),
                         githubApiFetch('personas')
                     ]);
-
                     populateReadme(readmeData.content);
                     populateDropdown(modalitySelect, modalitiesData);
                     populateCheckboxes(personasContainer, personasData);
-
                     generateButton.disabled = false;
                     updateStatus('Application ready. All components loaded successfully.');
                     showMainApp();
-
                 } catch (error) {
-                    console.error('Failed to load app data:', error);
-                    updateStatus(error.message, true);
+                    updateStatus(getErrorMessage(error), true);
                     generateButton.disabled = true;
                 } finally {
-                    saveButton.disabled = false;
+                    setLoadingState(saveButton, false, 'Save Settings & Load');
                 }
             };
 
             // --- 6. TICKET GENERATION LOGIC ---
             const handleGenerateTicket = async () => {
-                updateStatus('Generating ticket...');
-                generateButton.disabled = true;
+                const originalButtonText = 'Generate Ticket';
+                setLoadingState(generateButton, true, originalButtonText);
                 outputCode.textContent = 'Fetching components...';
                 copyButton.style.display = 'none';
 
@@ -423,31 +426,31 @@
                     const task = taskInput.value;
                     const context = contextInput.value;
                     const modalityPath = modalitySelect.value;
-                    const selectedPersonaCheckboxes = document.querySelectorAll('#personas-container input:checked');
-                    const personaPaths = Array.from(selectedPersonaCheckboxes).map(cb => cb.value);
+                    const personaPaths = Array.from(document.querySelectorAll('#personas-container input:checked')).map(cb => cb.value);
                     const knowledgePath = knowledgePathInput.value.trim();
 
-                    if (!knowledgePath) {
-                        throw new Error("Ticket Context Path is required.");
-                    }
+                    if (!knowledgePath) throw new Error("Ticket Context Path is required.");
 
                     const fetchPromises = {};
-                    fetchPromises.protocol = githubApiFetch('protocols/CORE_PROTOCOL.md');
+                    fetchPromises.protocol = githubApiFetch(CORE_PROTOCOL_PATH);
                     fetchPromises.modality = githubApiFetch(modalityPath);
-                    fetchPromises.personas = Promise.all(personaPaths.map(path => githubApiFetch(path)));
+                    fetchPromises.personas = Promise.all(personaPaths.map(p => githubApiFetch(p)));
 
                     const knowledgeFileHeaders = await githubApiFetch(knowledgePath);
-                    const filteredKnowledgeFiles = knowledgeFileHeaders.filter(file => file.name.toLowerCase() !== 'readme.md');
-                    fetchPromises.knowledge = Promise.all(filteredKnowledgeFiles.map(file => githubApiFetch(file.path)));
+                    const filteredKnowledgeFiles = knowledgeFileHeaders.filter(f => f.name.toLowerCase() !== 'readme.md');
+                    if(filteredKnowledgeFiles.length === 0) {
+                        updateStatus('Warning: No knowledge files found in the specified context path. Ticket generated without them.', false);
+                    }
+                    fetchPromises.knowledge = Promise.all(filteredKnowledgeFiles.map(f => githubApiFetch(f.path)));
 
                     const results = await Promise.all(Object.values(fetchPromises));
                     const [protocolData, modalityData, personasData, knowledgeData] = results;
 
-                    const decode = (base64) => atob(base64);
+                    const decode = (b64) => atob(b64);
                     const protocolContent = decode(protocolData.content);
                     const modalityContent = decode(modalityData.content);
                     const personasContent = personasData.map(p => `--- PERSONA: ${p.name.replace('.md','')} ---\n${decode(p.content)}`).join('\n\n');
-                    const knowledgeContent = knowledgeData.map((k, index) => `--- KNOWLEDGE: ${filteredKnowledgeFiles[index].name} ---\n${decode(k.content)}`).join('\n\n');
+                    const knowledgeContent = knowledgeData.length > 0 ? knowledgeData.map((k, i) => `--- KNOWLEDGE: ${filteredKnowledgeFiles[i].name} ---\n${decode(k.content)}`).join('\n\n') : 'No knowledge files were provided for this ticket.';
 
                     const finalTicket = `
 ### TASK DEFINITION
@@ -479,13 +482,12 @@ ${knowledgeContent}
                     outputCode.textContent = finalTicket;
                     copyButton.style.display = 'inline-block';
                     updateStatus('Ticket generated successfully!');
-
                 } catch (error) {
-                    console.error('Failed to generate ticket:', error);
-                    updateStatus(error.message, true);
-                    outputCode.textContent = `Error: ${error.message}`;
+                    const errorMessage = getErrorMessage(error);
+                    updateStatus(errorMessage, true);
+                    outputCode.textContent = errorMessage;
                 } finally {
-                    generateButton.disabled = false;
+                    setLoadingState(generateButton, false, originalButtonText);
                 }
             };
 
@@ -493,10 +495,7 @@ ${knowledgeContent}
                 navigator.clipboard.writeText(outputCode.textContent).then(() => {
                     copyButton.textContent = 'Copied!';
                     setTimeout(() => { copyButton.textContent = 'Copy to Clipboard'; }, 2000);
-                }).catch(err => {
-                    updateStatus('Failed to copy text.', true);
-                    console.error('Copy failed:', err);
-                });
+                }).catch(err => updateStatus('Failed to copy text.', true));
             };
 
             // --- 7. Event Listeners ---
