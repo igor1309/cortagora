@@ -62,26 +62,19 @@ const TicketBuilderApp = {
     // --- MAIN APP LOGIC / CONTROLLER ---
     async _fetchAndParseDirectoryItems(dirPath) {
         const directoryListing = await this.api.fetchContent(dirPath);
-
         const mdFiles = directoryListing.filter(f =>
             f.type === 'file' && f.name.endsWith('.md') && f.name.toLowerCase() !== 'readme.md'
         );
-
         const filesWithContent = await Promise.all(
             mdFiles.map(file =>
-                this.api.fetchContent(file.path).then(contentData => ({
-                    ...file,
-                    content: contentData.content
-                }))
+                this.api.fetchContent(file.path).then(contentData => ({...file, content: contentData.content}))
             )
         );
-
         return filesWithContent.map(file => {
             const decodedContent = this.api.decodeContent(file.content);
             const frontMatter = this.api.parseFrontMatter(decodedContent);
             const title = this.api.parseFrontMatterTitle(frontMatter);
             const fallbackName = file.name.replace('.md', '').trim();
-
             return { ...file, displayName: title || fallbackName };
         });
     },
@@ -94,7 +87,6 @@ const TicketBuilderApp = {
                 this._fetchAndParseDirectoryItems('modalities'),
                 this._fetchAndParseDirectoryItems('personas')
             ]);
-
             this.ui.populateReadme(readmeData.content);
             this.ui.populateDropdown(modalities);
             this.ui.populateCheckboxes(personas);
@@ -112,42 +104,57 @@ const TicketBuilderApp = {
     async handleGenerateTicket() {
         const originalButtonText = 'Generate Ticket';
         this.ui.setLoadingState('generateButton', true, originalButtonText);
-        this.ui.displayInitialMessage('Fetching components...');
+        this.ui.displayInitialMessage('Fetching and processing components...');
         try {
+            // --- 1. GATHER INPUTS FROM UI ---
             const task = this.ui.getTaskInput();
             const context = this.ui.getContextInput();
             const modalityPath = this.ui.getModalityPath();
-            const personaPaths = this.ui.getSelectedPersonaPaths();
+            const modalityName = this.ui.getModalityDisplayName();
+            const selectedPersonas = this.ui.getSelectedPersonas();
             const knowledgePath = this.ui.getKnowledgePath();
 
             if (!knowledgePath) throw new Error("Ticket Context Path is required.");
 
-            const fetchPromises = {
-                protocol: this.api.fetchContent(this.CORE_PROTOCOL_PATH),
-                modality: this.api.fetchContent(modalityPath),
-                personas: Promise.all(personaPaths.map(p => this.api.fetchContent(p))),
-            };
+            // --- 2. FETCH & PROCESS ALL COMPONENTS IN PARALLEL ---
+            const protocolPromise = this.api.fetchContent(this.CORE_PROTOCOL_PATH)
+                .then(data => this.api.stripFrontMatter(this.api.decodeContent(data.content)));
 
-            const knowledgeFileHeaders = await this.api.fetchContent(knowledgePath);
-            const filteredKnowledgeFiles = knowledgeFileHeaders.filter(f => f.name.toLowerCase() !== 'readme.md');
-            if(filteredKnowledgeFiles.length === 0) {
-                this.ui.updateStatus('Warning: No knowledge files found. Ticket generated without them.', false);
-            }
-            fetchPromises.knowledge = Promise.all(filteredKnowledgeFiles.map(f => this.api.fetchContent(f.path)));
+            const modalityPromise = this.api.fetchContent(modalityPath)
+                .then(data => this.api.stripFrontMatter(this.api.decodeContent(data.content)));
 
-            const results = await Promise.all(Object.values(fetchPromises));
-            const [protocolData, modalityData, personasData, knowledgeData] = results;
+            const personasPromise = Promise.all(selectedPersonas.map(p => this.api.fetchContent(p.path)))
+                .then(results => results.map((data, i) => {
+                    const stripped = this.api.stripFrontMatter(this.api.decodeContent(data.content));
+                    const displayName = selectedPersonas[i].displayName;
+                    return `--- PERSONA: ${displayName} ---\n${stripped}`;
+                }).join('\n\n'));
 
-            const protocolContent = this.api.decodeContent(protocolData.content);
-            const modalityContent = this.api.stripFrontMatter(this.api.decodeContent(modalityData.content));
-            const personasContent = personasData.map(p => {
-                const decoded = this.api.decodeContent(p.content);
-                const stripped = this.api.stripFrontMatter(decoded);
-                return `--- PERSONA: ${p.name.replace('.md','')} ---\n${stripped}`;
-            }).join('\n\n');
-            const knowledgeContent = knowledgeData.length > 0 ? knowledgeData.map((k, i) => `--- KNOWLEDGE: ${filteredKnowledgeFiles[i].name} ---\n${this.api.decodeContent(k.content)}`).join('\n\n') : 'No knowledge files were provided for this ticket.';
+            const knowledgePromise = this.api.fetchContent(knowledgePath).then(async (headers) => {
+                const mdFiles = headers.filter(f => f.name.toLowerCase() !== 'readme.md');
+                if (mdFiles.length === 0) {
+                    this.ui.updateStatus('Warning: No knowledge files found. Ticket generated without them.', false);
+                    return 'No knowledge files were provided for this ticket.';
+                }
+                const contentPromises = mdFiles.map(f => this.api.fetchContent(f.path));
+                const filesWithContent = await Promise.all(contentPromises);
 
-            const ticketTemplate = `### TASK DEFINITION\n---\n**TASK:** ${task}\n**ADDITIONAL CONTEXT:** ${context}\n\n\n### CORE PROTOCOL\n---\n${protocolContent}\n\n\n### MODALITY: MODALITY_PLACEHOLDER\n---\n${modalityContent}\n\n\n### SELECTED PERSONAS\n---\n${personasContent}\n\n\n### CURATED KNOWLEDGE\n---\n${knowledgeContent}`.trim();
+                return filesWithContent.map(fileData => {
+                    const decoded = this.api.decodeContent(fileData.content);
+                    const frontMatter = this.api.parseFrontMatter(decoded);
+                    const title = this.api.parseFrontMatterTitle(frontMatter);
+                    const stripped = this.api.stripFrontMatter(decoded);
+                    const displayName = title || fileData.name.replace(/\.md$/i, '');
+                    return `--- KNOWLEDGE: ${displayName} ---\n${stripped}`;
+                }).join('\n\n');
+            });
+
+            const [protocolContent, modalityContent, personasContent, knowledgeContent] = await Promise.all([
+                protocolPromise, modalityPromise, personasPromise, knowledgePromise
+            ]);
+
+            // --- 3. ASSEMBLE THE FINAL TICKET ---
+            const ticketTemplate = `### TASK DEFINITION\n---\n**TASK:** ${task}\n**ADDITIONAL CONTEXT:** ${context}\n\n\n### CORE PROTOCOL\n---\n${protocolContent}\n\n\n### MODALITY: ${modalityName}\n---\n${modalityContent}\n\n\n### SELECTED PERSONAS\n---\n${personasContent}\n\n\n### CURATED KNOWLEDGE\n---\n${knowledgeContent}`.trim();
 
             this.ui.displayTicket(ticketTemplate);
             this.ui.updateStatus('Ticket generated successfully!');
@@ -163,19 +170,14 @@ const TicketBuilderApp = {
     handleCopy() {
         const textToCopy = this.ui.getOutputText();
         navigator.clipboard.writeText(textToCopy)
-            .then(() => {
-                this.ui.setCopiedState();
-            })
+            .then(() => { this.ui.setCopiedState(); })
             .catch(err => this.ui.updateStatus('Failed to copy text.', true));
     },
 
     // --- App Initialization ---
     init() {
-        // The main app creates and integrates modules, injecting dependencies.
-        // `marked` is available globally from the CDN script.
         this.ui = createUiModule(window, marked);
         this.api = createApiModule(window);
-
         this.ui.init();
         this.api.init(this.settings);
         this.saveSettings = this.saveSettings.bind(this);
@@ -190,5 +192,4 @@ const TicketBuilderApp = {
     }
 };
 
-// Start the application
 TicketBuilderApp.init();

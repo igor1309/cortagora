@@ -40,9 +40,20 @@ export const createUiModule = function(window, marked) {
         getTaskInput: function() { return this._elements.taskInput.value; },
         getContextInput: function() { return this._elements.contextInput.value; },
         getModalityPath: function() { return this._elements.modalitySelect.value; },
+        getModalityDisplayName: function() {
+            const selectedOption = this._elements.modalitySelect.options[this._elements.modalitySelect.selectedIndex];
+            return selectedOption ? selectedOption.text : '';
+        },
         getKnowledgePath: function() { return this._elements.knowledgePathInput.value.trim(); },
-        getSelectedPersonaPaths: function() {
-            return Array.from(this._elements.personasContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+        getSelectedPersonas: function() {
+            return Array.from(this._elements.personasContainer.querySelectorAll('input:checked')).map(cb => {
+                // The label is assumed to be the next sibling of the input checkbox
+                const label = cb.nextElementSibling;
+                return {
+                    path: cb.value,
+                    displayName: label ? label.textContent.trim() : ''
+                };
+            });
         },
         getOutputText: function() { return this._elements.outputCode.textContent; },
 
@@ -62,7 +73,6 @@ export const createUiModule = function(window, marked) {
             this._elements.mainAppContainer.style.display = 'block';
         },
         populateReadme(content) {
-            // Uses the injected `marked` library and `window.atob`
             this._elements.readmeContent.innerHTML = marked.parse(window.atob(content));
         },
         populateDropdown(files) {
@@ -90,10 +100,8 @@ export const createUiModule = function(window, marked) {
                 container.appendChild(wrap);
             });
         },
-        displayTicket(ticketTemplate) {
-            const modalityText = this._elements.modalitySelect.options[this._elements.modalitySelect.selectedIndex].text;
-            const finalTicketText = ticketTemplate.replace('MODALITY_PLACEHOLDER', modalityText);
-            this._elements.outputCode.textContent = finalTicketText;
+        displayTicket(ticketText) {
+            this._elements.outputCode.textContent = ticketText;
             this._elements.copyButton.style.display = 'inline-block';
         },
         displayInitialMessage(message) {
@@ -105,7 +113,6 @@ export const createUiModule = function(window, marked) {
         },
         setCopiedState() {
             this._elements.copyButton.textContent = 'Copied!';
-            // Uses the injected `window.setTimeout`
             window.setTimeout(() => {
                 this._elements.copyButton.textContent = 'Copy to Clipboard';
             }, 2000);
