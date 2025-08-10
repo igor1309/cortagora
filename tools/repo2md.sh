@@ -155,6 +155,23 @@ safe_fence_for_file() {
   repeat_ticks "$n"
 }
 
+# inline code-span для заголовков: безопасно оборачивает basename
+max_backticks_in_string_plus1() {
+  awk '{
+    line=$0; cnt=0;
+    for(i=1;i<=length(line);i++){
+      ch=substr(line,i,1);
+      if(ch=="`"){cnt++} else { if(cnt>max){max=cnt}; cnt=0 }
+    }
+    if(cnt>max){max=cnt}
+  } END { m=max+1; if(m<1)m=1; print m }'
+}
+code_span() {
+  local s="$1" n ticks
+  n=$(printf '%s' "$s" | max_backticks_in_string_plus1)
+  ticks=$(repeat_ticks "$n"); printf '%s%s%s' "$ticks" "$s" "$ticks"
+}
+
 wc_bytes() { wc -c < "$1" | tr -d '[:space:]'; }
 wc_lines() { wc -l < "$1" | tr -d '[:space:]'; }
 
@@ -199,6 +216,21 @@ ignore_match() {
   return 1
 }
 
+# бинарные/не-текстовые файлы — пропускаем содержимое
+is_binary() {
+  local out
+  out=$(file -b --mime "$1" 2>/dev/null || file -b "$1" 2>/dev/null || echo "")
+  if printf '%s\n' "$out" | grep -qi 'charset=binary'; then return 0; fi
+  if printf '%s\n' "$out" | grep -qi '^text/'; then return 1; fi
+  # fallback: NUL-байты в первых 4К
+  if LC_ALL=C od -An -t x1 -N 4096 "$1" \
+     | awk '{for(i=1;i<=NF;i++) if($i=="00"){print "bin"; exit}}' \
+     | grep -q bin; then
+    return 0
+  fi
+  return 1
+}
+
 # --- Collect inputs ----------------------------------------------------------
 
 declare -a PATHS=() BASES=() SLUGS=() SIZES=() LINES=() RELS=()
@@ -217,7 +249,7 @@ for p in "$@"; do
 
     PATHS+=("$p")
     BASES+=("$base")
-    SLUGS+=("$(slugify "$base")")
+    SLUGS+=("$(slugify "$rel")")   # якорь из относительного пути
     RELS+=("$rel")
 
     b=$(wc_bytes "$p")
@@ -263,34 +295,37 @@ TAIL="${LINES_TAIL:-0}"
 for i in "${!PATHS[@]}"; do
   p="${PATHS[$i]}"; base="${BASES[$i]}"; slug="${SLUGS[$i]}"; rel="${RELS[$i]}"
   ext="$(ext_of "$base")"; lang="$(lang_of_ext "$ext")"
-  fence="$(safe_fence_for_file "$p")"
   total_l="${LINES[$i]}"
 
   {
     printf '<a id="%s"></a>\n' "$slug"
-    printf '### %s\n\n' "$base"
+    printf '### %s\n\n' "$(code_span "$base")"
     printf '_Path: %s_\n\n' "$rel"
 
-    if [[ -n "$lang" ]]; then
-      # Открывающий фенс той же длины, что и закрывающий; язык — через пробел
-      printf '%s %s\n' "$fence" "$lang"
+    if is_binary "$p"; then
+      printf '... [binary file skipped: %s]\n\n' "$(human_size "${SIZES[$i]}")"
     else
-      printf '%s\n' "$fence"
-    fi
+      fence="$(safe_fence_for_file "$p")"
+      if [[ -n "$lang" ]]; then
+        printf '%s%s\n' "$fence" "$lang"
+      else
+        printf '%s\n' "$fence"
+      fi
 
-    if (( HEAD>0 || TAIL>0 )); then
-      if (( total_l > HEAD + TAIL && HEAD>0 && TAIL>0 )); then
-        sed -n "1,${HEAD}p" "$p"
-        printf '\n... [truncated %d lines]\n\n' "$(( total_l - HEAD - TAIL ))"
-        tail -n "$TAIL" "$p"
+      if (( HEAD>0 || TAIL>0 )); then
+        if (( total_l > HEAD + TAIL && HEAD>0 && TAIL>0 )); then
+          sed -n "1,${HEAD}p" "$p"
+          printf '\n... [truncated %d lines]\n\n' "$(( total_l - HEAD - TAIL ))"
+          tail -n "$TAIL" "$p"
+        else
+          cat "$p"
+        fi
       else
         cat "$p"
       fi
-    else
-      cat "$p"
-    fi
 
-    printf '\n%s\n\n' "$fence"
+      printf '\n%s\n\n' "$fence"
+    fi
   } >> "$TMP"
 done
 
