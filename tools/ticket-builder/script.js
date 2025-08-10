@@ -1,3 +1,4 @@
+// Path: script.js
 import { createUiModule } from './js/ui.js';
 import { createApiModule } from './js/api.js';
 
@@ -31,7 +32,6 @@ const TicketBuilderApp = {
         const savedRepo = localStorage.getItem('cortagora_repo');
         const savedPat = localStorage.getItem('cortagora_pat');
         if (savedRepo && savedPat) {
-            // This now calls the ui object attached to 'this'
             this.ui.setCredentials(savedRepo, savedPat);
             this.settings.repo = savedRepo;
             this.settings.pat = savedPat;
@@ -60,17 +60,44 @@ const TicketBuilderApp = {
     },
 
     // --- MAIN APP LOGIC / CONTROLLER ---
+    async _fetchAndParseDirectoryItems(dirPath) {
+        const directoryListing = await this.api.fetchContent(dirPath);
+
+        const mdFiles = directoryListing.filter(f =>
+            f.type === 'file' && f.name.endsWith('.md') && f.name.toLowerCase() !== 'readme.md'
+        );
+
+        const filesWithContent = await Promise.all(
+            mdFiles.map(file =>
+                this.api.fetchContent(file.path).then(contentData => ({
+                    ...file,
+                    content: contentData.content
+                }))
+            )
+        );
+
+        return filesWithContent.map(file => {
+            const decodedContent = this.api.decodeContent(file.content);
+            const frontMatter = this.api.parseFrontMatter(decodedContent);
+            const title = this.api.parseFrontMatterTitle(frontMatter);
+            const fallbackName = file.name.replace('.md', '').trim();
+
+            return { ...file, displayName: title || fallbackName };
+        });
+    },
+
     async loadAppData() {
         this.ui.setLoadingState('saveButton', true, 'Save Settings & Load');
         try {
-            const [readmeData, modalitiesData, personasData] = await Promise.all([
+            const [readmeData, modalities, personas] = await Promise.all([
                 this.api.fetchContent('tools/ticket-builder/README.md'),
-                this.api.fetchContent('modalities'),
-                this.api.fetchContent('personas')
+                this._fetchAndParseDirectoryItems('modalities'),
+                this._fetchAndParseDirectoryItems('personas')
             ]);
+
             this.ui.populateReadme(readmeData.content);
-            this.ui.populateDropdown(modalitiesData);
-            this.ui.populateCheckboxes(personasData);
+            this.ui.populateDropdown(modalities);
+            this.ui.populateCheckboxes(personas);
             this.ui.setGeneratorEnabled(true);
             this.ui.updateStatus('Application ready. All components loaded successfully.');
             this.ui.showMainApp();

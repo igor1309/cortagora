@@ -1,3 +1,4 @@
+// Path: js/api.js
 // This file defines a factory function that creates and returns the API module.
 // It receives its dependencies (window) to improve testability and avoid globals.
 export const createApiModule = function(window) {
@@ -24,6 +25,17 @@ export const createApiModule = function(window) {
         decodeContent(base64) {
             // Uses the injected window.atob
             return new TextDecoder('utf-8').decode(Uint8Array.from(window.atob(base64), c => c.charCodeAt(0)));
+        },
+
+        parseFrontMatter(decodedContent) {
+            const match = decodedContent.match(/^---\s*\n([\s\S]+?)\n---\s*/);
+            return match ? match[1] : null;
+        },
+
+        parseFrontMatterTitle(frontMatterString) {
+            if (!frontMatterString) return null;
+            const match = frontMatterString.match(/(?:^|\n)title:\s*['"]?(.+?)['"]?(?:\n|$)/);
+            return match ? match[1].trim() : null;
         }
     };
     return apiModule;

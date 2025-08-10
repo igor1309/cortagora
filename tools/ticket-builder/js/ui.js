@@ -1,3 +1,4 @@
+// Path: js/ui.js
 // This file defines a factory function that creates and returns the UI module.
 // It receives its dependencies (window, marked) to improve testability.
 // It is exported to be used as an ES Module.
@@ -67,28 +68,26 @@ export const createUiModule = function(window, marked) {
         populateDropdown(files) {
             const select = this._elements.modalitySelect;
             select.innerHTML = '';
-            files.filter(f => f.name.endsWith('.md') && f.name.toLowerCase() !== 'readme.md')
-                 .forEach(f => {
-                    const opt = doc.createElement('option');
-                    opt.value = f.path;
-                    opt.textContent = f.name.replace('.md', '').replace(/[\(\)\d]/g, '').trim();
-                    select.appendChild(opt);
+            files.forEach(f => {
+                const opt = doc.createElement('option');
+                opt.value = f.path;
+                opt.textContent = f.displayName;
+                select.appendChild(opt);
             });
         },
         populateCheckboxes(files) {
             const container = this._elements.personasContainer;
             container.innerHTML = '';
-            files.filter(f => f.name.endsWith('.md') && f.name.toLowerCase() !== 'readme.md')
-                 .forEach(f => {
-                    const id = `cb-${f.sha}`;
-                    const wrap = doc.createElement('div');
-                    const cb = doc.createElement('input');
-                    cb.type = 'checkbox'; cb.id = id; cb.value = f.path;
-                    const lbl = doc.createElement('label');
-                    lbl.htmlFor = id;
-                    lbl.textContent = f.name.replace('.md', '').replace('ПЕРСОНЫ', '').trim();
-                    wrap.append(cb, lbl);
-                    container.appendChild(wrap);
+            files.forEach(f => {
+                const id = `cb-${f.sha}`;
+                const wrap = doc.createElement('div');
+                const cb = doc.createElement('input');
+                cb.type = 'checkbox'; cb.id = id; cb.value = f.path;
+                const lbl = doc.createElement('label');
+                lbl.htmlFor = id;
+                lbl.textContent = f.displayName;
+                wrap.append(cb, lbl);
+                container.appendChild(wrap);
             });
         },
         displayTicket(ticketTemplate) {
