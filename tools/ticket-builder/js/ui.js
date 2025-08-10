@@ -38,7 +38,7 @@ export const createUiModule = function(window, marked) {
 
         getRepoInput: function() { return this._elements.repoPathInput.value.trim(); },
         getPatInput: function() { return this._elements.patInput.value.trim(); },
-        getTaskInput: function() { return this._elements.taskInput.value; },
+        getTaskInput: function() { return this._elements.taskInput.value.trim(); },
         getContextInput: function() { return this._elements.contextInput.value; },
         getModalityPath: function() { return this._elements.modalitySelect.value; },
         getModalityDisplayName: function() {

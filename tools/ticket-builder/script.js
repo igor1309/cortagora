@@ -108,19 +108,31 @@ const TicketBuilderApp = {
     },
 
     async handleGenerateTicket() {
+        // --- 1. GATHER AND VALIDATE INPUTS ---
+        const task = this.ui.getTaskInput();
+        if (!task) {
+            this.ui.updateStatus('Error: Task definition cannot be empty.', true);
+            this.ui.displayError('Please define the core task before generating a ticket.');
+            return;
+        }
+
+        const knowledgePath = this.ui.getKnowledgePath();
+        if (!knowledgePath) {
+            this.ui.updateStatus('Error: Ticket Context Path is required.', true);
+            this.ui.displayError('Please select or enter a Ticket Context Path.');
+            return;
+        }
+
+        // --- PASSED VALIDATION, PROCEED WITH GENERATION ---
         const originalButtonText = 'Generate Ticket';
         this.ui.setLoadingState('generateButton', true, originalButtonText);
         this.ui.displayInitialMessage('Fetching and processing components...');
         try {
-            // --- 1. GATHER INPUTS FROM UI ---
-            const task = this.ui.getTaskInput();
+            // Get remaining inputs
             const context = this.ui.getContextInput();
             const modalityPath = this.ui.getModalityPath();
             const modalityName = this.ui.getModalityDisplayName();
             const selectedPersonas = this.ui.getSelectedPersonas();
-            const knowledgePath = this.ui.getKnowledgePath();
-
-            if (!knowledgePath) throw new Error("Ticket Context Path is required.");
 
             // --- 2. FETCH & PROCESS ALL COMPONENTS IN PARALLEL ---
             const protocolPromise = this.api.fetchContent(this.CORE_PROTOCOL_PATH)
