@@ -1,4 +1,5 @@
 import { createUiModule } from './js/ui.js';
+import { createApiModule } from './js/api.js';
 
 const TicketBuilderApp = {
     // --- CONSTANTS ---
@@ -7,25 +8,9 @@ const TicketBuilderApp = {
     // --- State & Config ---
     settings: { repo: '', pat: '' },
 
-    // The UI module will be instantiated and placed here.
+    // The UI and API modules will be instantiated and placed here.
     ui: null,
-
-    // --- API module is unchanged ---
-    api: {
-        _settings: null,
-        init(settings) { this._settings = settings; },
-        async fetchContent(endpoint) {
-            const url = `https://api.github.com/repos/${this._settings.repo}/contents/${endpoint}?ref=trunk`;
-            const response = await fetch(url, {
-                headers: { 'Authorization': `token ${this._settings.pat}`, 'Accept': 'application/vnd.github.v3+json' }
-            });
-            if (!response.ok) { throw new Error(`${response.status}`); }
-            return response.json();
-        },
-        decodeContent(base64) {
-            return new TextDecoder('utf-8').decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)));
-        }
-    },
+    api: null,
 
     // --- UTILITY FUNCTIONS ---
     getErrorMessage(error) {
@@ -155,9 +140,10 @@ const TicketBuilderApp = {
 
     // --- App Initialization ---
     init() {
-        // The main app creates and integrates the UI module, injecting dependencies.
+        // The main app creates and integrates modules, injecting dependencies.
         // `marked` is available globally from the CDN script.
         this.ui = createUiModule(window, marked);
+        this.api = createApiModule(window);
 
         this.ui.init();
         this.api.init(this.settings);
