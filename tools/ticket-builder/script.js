@@ -1,3 +1,5 @@
+import { createUiModule } from './js/ui.js';
+
 const TicketBuilderApp = {
     // --- CONSTANTS ---
     CORE_PROTOCOL_PATH: 'protocols/CORE_PROTOCOL.md',
@@ -153,8 +155,9 @@ const TicketBuilderApp = {
 
     // --- App Initialization ---
     init() {
-        // The main app creates and integrates the UI module
-        this.ui = createUiModule();
+        // The main app creates and integrates the UI module, injecting dependencies.
+        // `marked` is available globally from the CDN script.
+        this.ui = createUiModule(window, marked);
 
         this.ui.init();
         this.api.init(this.settings);

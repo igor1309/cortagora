@@ -1,26 +1,30 @@
 // This file defines a factory function that creates and returns the UI module.
-window.createUiModule = function() {
+// It receives its dependencies (window, marked) to improve testability.
+// It is exported to be used as an ES Module.
+export const createUiModule = function(window, marked) {
+    const doc = window.document; // Local reference to the document object
+
     const uiModule = {
         _elements: {},
 
         init() {
             this._elements = {
-                configSection: document.getElementById('config-section'),
-                repoPathInput: document.getElementById('repo-path'),
-                patInput: document.getElementById('github-pat'),
-                saveButton: document.getElementById('save-button'),
-                statusArea: document.getElementById('status-area'),
-                readmeContent: document.getElementById('readme-content'),
-                modalitySelect: document.getElementById('modality-select'),
-                personasContainer: document.getElementById('personas-container'),
-                generateButton: document.getElementById('generate-button'),
-                mainAppContainer: document.getElementById('main-app-container'),
-                configHr: document.getElementById('config-hr'),
-                taskInput: document.getElementById('task-input'),
-                contextInput: document.getElementById('context-input'),
-                knowledgePathInput: document.getElementById('knowledge-path'),
-                outputCode: document.getElementById('output-code'),
-                copyButton: document.getElementById('copy-button'),
+                configSection: doc.getElementById('config-section'),
+                repoPathInput: doc.getElementById('repo-path'),
+                patInput: doc.getElementById('github-pat'),
+                saveButton: doc.getElementById('save-button'),
+                statusArea: doc.getElementById('status-area'),
+                readmeContent: doc.getElementById('readme-content'),
+                modalitySelect: doc.getElementById('modality-select'),
+                personasContainer: doc.getElementById('personas-container'),
+                generateButton: doc.getElementById('generate-button'),
+                mainAppContainer: doc.getElementById('main-app-container'),
+                configHr: doc.getElementById('config-hr'),
+                taskInput: doc.getElementById('task-input'),
+                contextInput: doc.getElementById('context-input'),
+                knowledgePathInput: doc.getElementById('knowledge-path'),
+                outputCode: doc.getElementById('output-code'),
+                copyButton: doc.getElementById('copy-button'),
             };
         },
 
@@ -57,14 +61,15 @@ window.createUiModule = function() {
             this._elements.mainAppContainer.style.display = 'block';
         },
         populateReadme(content) {
-            this._elements.readmeContent.innerHTML = marked.parse(atob(content));
+            // Uses the injected `marked` library and `window.atob`
+            this._elements.readmeContent.innerHTML = marked.parse(window.atob(content));
         },
         populateDropdown(files) {
             const select = this._elements.modalitySelect;
             select.innerHTML = '';
             files.filter(f => f.name.endsWith('.md') && f.name.toLowerCase() !== 'readme.md')
                  .forEach(f => {
-                    const opt = document.createElement('option');
+                    const opt = doc.createElement('option');
                     opt.value = f.path;
                     opt.textContent = f.name.replace('.md', '').replace(/[\(\)\d]/g, '').trim();
                     select.appendChild(opt);
@@ -76,10 +81,10 @@ window.createUiModule = function() {
             files.filter(f => f.name.endsWith('.md') && f.name.toLowerCase() !== 'readme.md')
                  .forEach(f => {
                     const id = `cb-${f.sha}`;
-                    const wrap = document.createElement('div');
-                    const cb = document.createElement('input');
+                    const wrap = doc.createElement('div');
+                    const cb = doc.createElement('input');
                     cb.type = 'checkbox'; cb.id = id; cb.value = f.path;
-                    const lbl = document.createElement('label');
+                    const lbl = doc.createElement('label');
                     lbl.htmlFor = id;
                     lbl.textContent = f.name.replace('.md', '').replace('ПЕРСОНЫ', '').trim();
                     wrap.append(cb, lbl);
@@ -101,7 +106,8 @@ window.createUiModule = function() {
         },
         setCopiedState() {
             this._elements.copyButton.textContent = 'Copied!';
-            setTimeout(() => {
+            // Uses the injected `window.setTimeout`
+            window.setTimeout(() => {
                 this._elements.copyButton.textContent = 'Copy to Clipboard';
             }, 2000);
         },
