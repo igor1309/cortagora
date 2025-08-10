@@ -139,8 +139,12 @@ const TicketBuilderApp = {
             const [protocolData, modalityData, personasData, knowledgeData] = results;
 
             const protocolContent = this.api.decodeContent(protocolData.content);
-            const modalityContent = this.api.decodeContent(modalityData.content);
-            const personasContent = personasData.map(p => `--- PERSONA: ${p.name.replace('.md','')} ---\n${this.api.decodeContent(p.content)}`).join('\n\n');
+            const modalityContent = this.api.stripFrontMatter(this.api.decodeContent(modalityData.content));
+            const personasContent = personasData.map(p => {
+                const decoded = this.api.decodeContent(p.content);
+                const stripped = this.api.stripFrontMatter(decoded);
+                return `--- PERSONA: ${p.name.replace('.md','')} ---\n${stripped}`;
+            }).join('\n\n');
             const knowledgeContent = knowledgeData.length > 0 ? knowledgeData.map((k, i) => `--- KNOWLEDGE: ${filteredKnowledgeFiles[i].name} ---\n${this.api.decodeContent(k.content)}`).join('\n\n') : 'No knowledge files were provided for this ticket.';
 
             const ticketTemplate = `### TASK DEFINITION\n---\n**TASK:** ${task}\n**ADDITIONAL CONTEXT:** ${context}\n\n\n### CORE PROTOCOL\n---\n${protocolContent}\n\n\n### MODALITY: MODALITY_PLACEHOLDER\n---\n${modalityContent}\n\n\n### SELECTED PERSONAS\n---\n${personasContent}\n\n\n### CURATED KNOWLEDGE\n---\n${knowledgeContent}`.trim();

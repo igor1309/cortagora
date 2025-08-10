@@ -36,6 +36,11 @@ export const createApiModule = function(window) {
             if (!frontMatterString) return null;
             const match = frontMatterString.match(/(?:^|\n)title:\s*['"]?(.+?)['"]?(?:\n|$)/);
             return match ? match[1].trim() : null;
+        },
+
+        stripFrontMatter(decodedContent) {
+            const frontMatterRegex = /^---\s*\n[\s\S]+?\n---\s*/;
+            return decodedContent.replace(frontMatterRegex, '').trim();
         }
     };
     return apiModule;
