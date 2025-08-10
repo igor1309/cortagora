@@ -5,8 +5,8 @@ const TicketBuilderApp = {
     // --- State & Config ---
     settings: { repo: '', pat: '' },
 
-    // The UI object has been removed from here.
-    // It is now loaded from js/ui.js and is available globally.
+    // The UI module will be instantiated and placed here.
+    ui: null,
 
     // --- API module is unchanged ---
     api: {
@@ -44,67 +44,67 @@ const TicketBuilderApp = {
         const savedRepo = localStorage.getItem('cortagora_repo');
         const savedPat = localStorage.getItem('cortagora_pat');
         if (savedRepo && savedPat) {
-            // This now calls the global ui object
-            ui.setCredentials(savedRepo, savedPat);
+            // This now calls the ui object attached to 'this'
+            this.ui.setCredentials(savedRepo, savedPat);
             this.settings.repo = savedRepo;
             this.settings.pat = savedPat;
-            ui.updateStatus('Saved settings loaded. Fetching data...');
+            this.ui.updateStatus('Saved settings loaded. Fetching data...');
             this.loadAppData();
         }
     },
 
     saveSettings() {
-        const repo = ui.getRepoInput();
-        const pat = ui.getPatInput();
+        const repo = this.ui.getRepoInput();
+        const pat = this.ui.getPatInput();
         if (!this.validateRepoPath(repo)) {
-            ui.updateStatus('Error: Invalid repository format. Please use "owner/repo".', true);
+            this.ui.updateStatus('Error: Invalid repository format. Please use "owner/repo".', true);
             return;
         }
         if (!pat) {
-            ui.updateStatus('Error: Personal Access Token is required.', true);
+            this.ui.updateStatus('Error: Personal Access Token is required.', true);
             return;
         }
         this.settings.repo = repo;
         this.settings.pat = pat;
         localStorage.setItem('cortagora_repo', repo);
         localStorage.setItem('cortagora_pat', pat);
-        ui.updateStatus('Settings saved. Loading data...');
+        this.ui.updateStatus('Settings saved. Loading data...');
         this.loadAppData();
     },
 
     // --- MAIN APP LOGIC / CONTROLLER ---
     async loadAppData() {
-        ui.setLoadingState('saveButton', true, 'Save Settings & Load');
+        this.ui.setLoadingState('saveButton', true, 'Save Settings & Load');
         try {
             const [readmeData, modalitiesData, personasData] = await Promise.all([
                 this.api.fetchContent('tools/ticket-builder/README.md'),
                 this.api.fetchContent('modalities'),
                 this.api.fetchContent('personas')
             ]);
-            ui.populateReadme(readmeData.content);
-            ui.populateDropdown(modalitiesData);
-            ui.populateCheckboxes(personasData);
-            ui.setGeneratorEnabled(true);
-            ui.updateStatus('Application ready. All components loaded successfully.');
-            ui.showMainApp();
+            this.ui.populateReadme(readmeData.content);
+            this.ui.populateDropdown(modalitiesData);
+            this.ui.populateCheckboxes(personasData);
+            this.ui.setGeneratorEnabled(true);
+            this.ui.updateStatus('Application ready. All components loaded successfully.');
+            this.ui.showMainApp();
         } catch (error) {
-            ui.updateStatus(this.getErrorMessage(error), true);
-            ui.setGeneratorEnabled(false);
+            this.ui.updateStatus(this.getErrorMessage(error), true);
+            this.ui.setGeneratorEnabled(false);
         } finally {
-            ui.setLoadingState('saveButton', false, 'Save Settings & Load');
+            this.ui.setLoadingState('saveButton', false, 'Save Settings & Load');
         }
     },
 
     async handleGenerateTicket() {
         const originalButtonText = 'Generate Ticket';
-        ui.setLoadingState('generateButton', true, originalButtonText);
-        ui.displayInitialMessage('Fetching components...');
+        this.ui.setLoadingState('generateButton', true, originalButtonText);
+        this.ui.displayInitialMessage('Fetching components...');
         try {
-            const task = ui.getTaskInput();
-            const context = ui.getContextInput();
-            const modalityPath = ui.getModalityPath();
-            const personaPaths = ui.getSelectedPersonaPaths();
-            const knowledgePath = ui.getKnowledgePath();
+            const task = this.ui.getTaskInput();
+            const context = this.ui.getContextInput();
+            const modalityPath = this.ui.getModalityPath();
+            const personaPaths = this.ui.getSelectedPersonaPaths();
+            const knowledgePath = this.ui.getKnowledgePath();
 
             if (!knowledgePath) throw new Error("Ticket Context Path is required.");
 
@@ -117,7 +117,7 @@ const TicketBuilderApp = {
             const knowledgeFileHeaders = await this.api.fetchContent(knowledgePath);
             const filteredKnowledgeFiles = knowledgeFileHeaders.filter(f => f.name.toLowerCase() !== 'readme.md');
             if(filteredKnowledgeFiles.length === 0) {
-                ui.updateStatus('Warning: No knowledge files found. Ticket generated without them.', false);
+                this.ui.updateStatus('Warning: No knowledge files found. Ticket generated without them.', false);
             }
             fetchPromises.knowledge = Promise.all(filteredKnowledgeFiles.map(f => this.api.fetchContent(f.path)));
 
@@ -131,35 +131,37 @@ const TicketBuilderApp = {
 
             const ticketTemplate = `### TASK DEFINITION\n---\n**TASK:** ${task}\n**ADDITIONAL CONTEXT:** ${context}\n\n\n### CORE PROTOCOL\n---\n${protocolContent}\n\n\n### MODALITY: MODALITY_PLACEHOLDER\n---\n${modalityContent}\n\n\n### SELECTED PERSONAS\n---\n${personasContent}\n\n\n### CURATED KNOWLEDGE\n---\n${knowledgeContent}`.trim();
 
-            ui.displayTicket(ticketTemplate);
-            ui.updateStatus('Ticket generated successfully!');
+            this.ui.displayTicket(ticketTemplate);
+            this.ui.updateStatus('Ticket generated successfully!');
         } catch (error) {
             const errorMessage = this.getErrorMessage(error);
-            ui.updateStatus(errorMessage, true);
-            ui.displayError(errorMessage);
+            this.ui.updateStatus(errorMessage, true);
+            this.ui.displayError(errorMessage);
         } finally {
-            ui.setLoadingState('generateButton', false, originalButtonText);
+            this.ui.setLoadingState('generateButton', false, originalButtonText);
         }
     },
 
     handleCopy() {
-        const textToCopy = ui.getOutputText();
+        const textToCopy = this.ui.getOutputText();
         navigator.clipboard.writeText(textToCopy)
             .then(() => {
-                ui.setCopiedState();
+                this.ui.setCopiedState();
             })
-            .catch(err => ui.updateStatus('Failed to copy text.', true));
+            .catch(err => this.ui.updateStatus('Failed to copy text.', true));
     },
 
     // --- App Initialization ---
     init() {
-        // This now initializes the global `ui` object
-        ui.init();
+        // The main app creates and integrates the UI module
+        this.ui = createUiModule();
+
+        this.ui.init();
         this.api.init(this.settings);
         this.saveSettings = this.saveSettings.bind(this);
         this.handleGenerateTicket = this.handleGenerateTicket.bind(this);
         this.handleCopy = this.handleCopy.bind(this);
-        ui.bindEvents({
+        this.ui.bindEvents({
             onSave: this.saveSettings,
             onGenerate: this.handleGenerateTicket,
             onCopy: this.handleCopy
