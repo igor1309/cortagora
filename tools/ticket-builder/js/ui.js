@@ -24,6 +24,7 @@ export const createUiModule = function(window, marked) {
                 taskInput: doc.getElementById('task-input'),
                 contextInput: doc.getElementById('context-input'),
                 knowledgePathInput: doc.getElementById('knowledge-path'),
+                knowledgePathList: doc.getElementById('knowledge-path-list'),
                 outputCode: doc.getElementById('output-code'),
                 copyButton: doc.getElementById('copy-button'),
             };
@@ -98,6 +99,15 @@ export const createUiModule = function(window, marked) {
                 lbl.textContent = f.displayName;
                 wrap.append(cb, lbl);
                 container.appendChild(wrap);
+            });
+        },
+        populateKnowledgeList(directories) {
+            const datalist = this._elements.knowledgePathList;
+            datalist.innerHTML = '';
+            directories.forEach(dir => {
+                const opt = doc.createElement('option');
+                opt.value = dir.path;
+                datalist.appendChild(opt);
             });
         },
         displayTicket(ticketText) {

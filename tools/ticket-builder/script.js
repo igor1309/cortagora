@@ -5,6 +5,7 @@ import { createApiModule } from './js/api.js';
 const TicketBuilderApp = {
     // --- CONSTANTS ---
     CORE_PROTOCOL_PATH: 'protocols/CORE_PROTOCOL.md',
+    SEMI_RAG_PATH: 'semi-RAG',
 
     // --- State & Config ---
     settings: { repo: '', pat: '' },
@@ -82,14 +83,19 @@ const TicketBuilderApp = {
     async loadAppData() {
         this.ui.setLoadingState('saveButton', true, 'Save Settings & Load');
         try {
-            const [readmeData, modalities, personas] = await Promise.all([
+            const [readmeData, modalities, personas, ragDirContents] = await Promise.all([
                 this.api.fetchContent('tools/ticket-builder/README.md'),
                 this._fetchAndParseDirectoryItems('modalities'),
-                this._fetchAndParseDirectoryItems('personas')
+                this._fetchAndParseDirectoryItems('personas'),
+                this.api.fetchContent(this.SEMI_RAG_PATH)
             ]);
+
+            const ragDirectories = ragDirContents.filter(item => item.type === 'dir');
+
             this.ui.populateReadme(readmeData.content);
             this.ui.populateDropdown(modalities);
             this.ui.populateCheckboxes(personas);
+            this.ui.populateKnowledgeList(ragDirectories);
             this.ui.setGeneratorEnabled(true);
             this.ui.updateStatus('Application ready. All components loaded successfully.');
             this.ui.showMainApp();
