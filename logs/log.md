@@ -53,7 +53,11 @@
 - Set up proper CSS/JS separation and modular architecture
 - Created comprehensive error handling and user feedback systems
 
-## 02.08.2025
+## 2025-08-07
+- Basic idea: simple webpage
+- Ext: backend with storage for protocol, personas, modalities;  update and keep unique doc by last version.
+
+## 2025-08-02
 - платформа бренда пока не дается (наслоение метафор не работает, а простые пояснения-примеры выглядят жалко)
 - обобщение Writers room через LoreCouncil к Cortagora (обсуждение с Gemini & Claude; итоговый нейминг и метафора мои) как среды-усилителя метаболизма (креативный допинг)
 
