@@ -2,17 +2,15 @@
 
 ## 2025-08-16
 
-**Knowledge Management System Finalized**
+**Knowledge Management & Automation**
 
-- Formalized the hybrid intake workflow for all repository knowledge.
-- Established the top-level `_inbox` folder as the single, temporary landing zone for frictionless capture of raw ideas and notes.
-- Defined the co-location principle for work-in-progress materials, establishing `_ideas`, `_research`, and `_archive` as standard staging folders within primary directories (`lore`, `domains`, `brand`, etc.).
-- Solidified the "Capture -> Triage -> Place" process as the core operational rhythm for maintaining repository health and organization.
+- **System:** Finalized the hybrid knowledge intake system. Raw ideas are captured in the top-level `_inbox`, then triaged into co-located WIP folders (`_ideas`, `_research`, `_archive`) within their relevant domains.
+- **Automation:** Implemented an automated inbox summary using GitHub Actions and the `@CortagoraInboxBot` Telegram bot.
+- **Report & Schedule:** The summary details `_inbox` content (sorted & grouped by month) and is scheduled for weekends (02:00 UTC), with a manual trigger also available.
 
 **Housekeeping**
 
-- Add files from Storytelling repo (now deleted): lores, etc.
-- Add files from iCloud.
+- Migrated and integrated materials from the old Storytelling repo and iCloud.
 
 ## 2025-08-10
 
