@@ -1,0 +1,25 @@
+name: Manual Inbox Summary Notifier
+
+# This allows the workflow to be triggered manually from the GitHub Actions tab
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for running the workflow'
+        required: false
+        default: 'Manual test run'
+
+jobs:
+  send-telegram-message:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        # We don't need the code for this simple test, but it's good practice
+        # and will be required for the next step.
+
+      - name: Send test message to Telegram
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.INBOX_BOT_TOKEN }}/sendMessage" \
+          -d "chat_id=${{ secrets.INBOX_CHAT_ID }}" \
+          -d "text=This is a manual test notification from your Cortagora repository. The connection is working."
