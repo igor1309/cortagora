@@ -2,8 +2,17 @@
 
 ## 2025-08-16
 
-- Move files from Storytelling repo: lores, etc
-- Move files from iCloud
+**Knowledge Management System Finalized**
+
+- Formalized the hybrid intake workflow for all repository knowledge.
+- Established the top-level `_inbox` folder as the single, temporary landing zone for frictionless capture of raw ideas and notes.
+- Defined the co-location principle for work-in-progress materials, establishing `_ideas`, `_research`, and `_archive` as standard staging folders within primary directories (`lore`, `domains`, `brand`, etc.).
+- Solidified the "Capture -> Triage -> Place" process as the core operational rhythm for maintaining repository health and organization.
+
+**Housekeeping**
+
+- Add files from Storytelling repo (now deleted): lores, etc.
+- Add files from iCloud.
 
 ## 2025-08-10
 
