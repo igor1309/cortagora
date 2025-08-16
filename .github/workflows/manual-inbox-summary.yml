@@ -1,5 +1,3 @@
-# .github/workflows/manual-inbox-summary.yml
-
 name: Manual Inbox Summary Notifier
 
 on:
@@ -25,16 +23,28 @@ jobs:
           if [ ! -d "_inbox" ]; then
             MESSAGE="Your Cortagora repository does not have an _inbox folder yet."
           else
-            INBOX_CONTENTS=$(ls -1 _inbox)
+            # Use find to get a reliable list of items. This handles spaces in names better than ls.
+            INBOX_ITEMS=$(find _inbox -maxdepth 1 -mindepth 1 -printf "%f\n")
 
-            if [ -z "$INBOX_CONTENTS" ]; then
+            if [ -z "$INBOX_ITEMS" ]; then
               MESSAGE="✅ Your Cortagora inbox is empty. Great job!"
             else
               HEADER=$'📬 *Cortagora Inbox Triage*\n\nYou have the following items to process:\n'
-              
-              # CORRECTED PART: Wrap each line (the filename) in backticks.
-              # The `&` in the sed command represents the entire matched line.
-              FORMATTED_LIST=$(echo "$INBOX_CONTENTS" | sed 's/^.*$/- `&`/')
+              FORMATTED_LIST=""
+
+              # Loop through each item to check its type (file or directory).
+              while IFS= read -r item; do
+                if [ -d "_inbox/$item" ]; then
+                  # If it's a directory, append the suffix.
+                  LINE="- \`$item (folder)\`"
+                else
+                  # If it's a file, format as before.
+                  LINE="- \`$item\`"
+                fi
+                
+                # Append the newly formatted line to our list.
+                FORMATTED_LIST="${FORMATTED_LIST}${LINE}"$'\n'
+              done <<< "$INBOX_ITEMS"
               
               MESSAGE="${HEADER}${FORMATTED_LIST}"
             fi
@@ -42,5 +52,5 @@ jobs:
 
           curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
           --data-urlencode "chat_id=${CHAT_ID}" \
-          --data-urlencode "parse_mode=Markdown" \
+          --data-urlencode "parse_mode=MarkdownV2" \
           --data-urlencode "text=${MESSAGE}"
