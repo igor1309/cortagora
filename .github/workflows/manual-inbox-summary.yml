@@ -1,14 +1,21 @@
-# .github/workflows/manual-inbox-summary.yml
+# .github/workflows/manual-in-box-summary.yml
 
-name: Manual Inbox Summary Notifier
+name: Inbox Summary Notifier
 
+# THE CHANGE IS HERE: Added the 'schedule' trigger
 on:
+  # This allows the workflow to be triggered on a schedule
+  schedule:
+    - cron: '0 2 * * 6' # Saturday at 2:00 AM UTC
+    - cron: '0 2 * * 0' # Sunday at 2:00 AM UTC
+
+  # This allows the workflow to be triggered manually from the GitHub Actions tab
   workflow_dispatch:
     inputs:
       reason:
         description: 'Reason for running the workflow'
         required: false
-        default: 'Checking inbox contents'
+        default: 'Manual run'
 
 jobs:
   send-inbox-summary:
@@ -29,17 +36,15 @@ jobs:
               CURRENT_MONTH_HEADER=""
               find _inbox -maxdepth 1 -mindepth 1 -printf "%TY-%Tm|%f\0" | sort -rz | \
               while IFS='|' read -r -d '' month_key filename; do
-                # Headers are now plain text because they will be inside a code block.
                 NEW_MONTH_HEADER=$(date -d "${month_key}-01" "+%-B %Y")
                 
                 if [ "$NEW_MONTH_HEADER" != "$CURRENT_MONTH_HEADER" ]; then
                   echo ""
                   echo "$NEW_MONTH_HEADER"
-                  echo "--------------------" # Add a separator for clarity
+                  echo "--------------------"
                   CURRENT_MONTH_HEADER="$NEW_MONTH_HEADER"
                 fi
 
-                # Filenames are now plain text as well.
                 if [ -d "_inbox/$filename" ]; then
                   echo "- $filename (folder)"
                 else
@@ -51,10 +56,7 @@ jobs:
             if [ -z "$FORMATTED_LIST" ]; then
               MESSAGE="✅ Your Cortagora inbox is empty. Great job!"
             else
-              # The main header remains bold, outside the code block.
               HEADER=$'📬 *Cortagora Inbox Triage*\n\nYou have the following items to process:\n'
-              
-              # THE CHANGE: Wrap the entire list in a fenced code block.
               MESSAGE="${HEADER}"$'```'"${FORMATTED_LIST}"$'\n```'
             fi
           fi
