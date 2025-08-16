@@ -25,28 +25,25 @@ jobs:
           if [ ! -d "_inbox" ]; then
             MESSAGE="Your Cortagora repository does not have an _inbox folder yet."
           else
-            # We will generate the body of the message inside a command substitution to avoid the subshell trap.
             FORMATTED_LIST=$(
-              # This variable is now local to the subshell, which is fine.
               CURRENT_MONTH_HEADER=""
-
-              # The find and sort commands now pipe directly into the while loop.
               find _inbox -maxdepth 1 -mindepth 1 -printf "%TY-%Tm|%f\0" | sort -rz | \
               while IFS='|' read -r -d '' month_key filename; do
-                NEW_MONTH_HEADER=$(date -d "${month_key}-01" "+*%-B %Y*")
+                # Headers are now plain text because they will be inside a code block.
+                NEW_MONTH_HEADER=$(date -d "${month_key}-01" "+%-B %Y")
                 
                 if [ "$NEW_MONTH_HEADER" != "$CURRENT_MONTH_HEADER" ]; then
-                  # Add a blank line for spacing between month groups.
-                  # The first group will have a leading blank line, which is acceptable.
                   echo ""
                   echo "$NEW_MONTH_HEADER"
+                  echo "--------------------" # Add a separator for clarity
                   CURRENT_MONTH_HEADER="$NEW_MONTH_HEADER"
                 fi
 
+                # Filenames are now plain text as well.
                 if [ -d "_inbox/$filename" ]; then
-                  echo "- \`$filename (folder)\`"
+                  echo "- $filename (folder)"
                 else
-                  echo "- \`$filename\`"
+                  echo "- $filename"
                 fi
               done
             )
@@ -54,8 +51,11 @@ jobs:
             if [ -z "$FORMATTED_LIST" ]; then
               MESSAGE="✅ Your Cortagora inbox is empty. Great job!"
             else
-              HEADER=$'📬 *Cortagora Inbox Triage*\n\nYou have the following items to process:'
-              MESSAGE="${HEADER}${FORMATTED_LIST}"
+              # The main header remains bold, outside the code block.
+              HEADER=$'📬 *Cortagora Inbox Triage*\n\nYou have the following items to process:\n'
+              
+              # THE CHANGE: Wrap the entire list in a fenced code block.
+              MESSAGE="${HEADER}"$'```'"${FORMATTED_LIST}"$'\n```'
             fi
           fi
 
