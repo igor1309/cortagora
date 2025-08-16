@@ -1,25 +1,46 @@
 name: Manual Inbox Summary Notifier
 
-# This allows the workflow to be triggered manually from the GitHub Actions tab
 on:
   workflow_dispatch:
     inputs:
       reason:
         description: 'Reason for running the workflow'
         required: false
-        default: 'Manual test run'
+        default: 'Checking inbox contents'
 
 jobs:
-  send-telegram-message:
+  send-inbox-summary:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        # We don't need the code for this simple test, but it's good practice
-        # and will be required for the next step.
 
-      - name: Send test message to Telegram
+      - name: Prepare and Send Summary
         run: |
+          # Check if the _inbox directory exists.
+          if [ ! -d "_inbox" ]; then
+            MESSAGE="Your Cortagora repository does not have an _inbox folder yet."
+          else
+            # List the contents of the _inbox, one item per line.
+            # This handles files and folders.
+            INBOX_CONTENTS=$(ls -1 _inbox)
+
+            # Check if the inbox is empty.
+            if [ -z "$INBOX_CONTENTS" ]; then
+              MESSAGE="✅ Your Cortagora inbox is empty. Great job!"
+            else
+              # If not empty, format the message with a header and the list.
+              HEADER="📬 *Cortagora Inbox Triage*\n\nYou have the following items to process:\n"
+              # Prepend each item with a dash for a clean list look.
+              FORMATTED_LIST=$(echo "$INBOX_CONTENTS" | sed 's/^/- /')
+              MESSAGE="$HEADER\n$FORMATTED_LIST"
+            fi
+          fi
+
+          # Send the final composed message to Telegram.
+          # The -s flag silences curl's progress output.
+          # The --data-urlencode flag is used for 'text' to correctly handle newlines and special characters.
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.INBOX_BOT_TOKEN }}/sendMessage" \
-          -d "chat_id=${{ secrets.INBOX_CHAT_ID }}" \
-          -d "text=This is a manual test notification from your Cortagora repository. The connection is working."
+          --data-urlencode "chat_id=${{ secrets.INBOX_CHAT_ID }}" \
+          --data-urlencode "parse_mode=Markdown" \
+          --data-urlencode "text=${MESSAGE}"
