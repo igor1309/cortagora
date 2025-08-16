@@ -19,33 +19,27 @@ jobs:
 
       - name: Prepare and Send Summary
         env:
-          # Define secrets as environment variables for easier use in the script
           BOT_TOKEN: ${{ secrets.INBOX_BOT_TOKEN }}
           CHAT_ID: ${{ secrets.INBOX_CHAT_ID }}
         run: |
-          # Check if the _inbox directory exists.
           if [ ! -d "_inbox" ]; then
             MESSAGE="Your Cortagora repository does not have an _inbox folder yet."
           else
-            # List the contents of the _inbox, one item per line.
             INBOX_CONTENTS=$(ls -1 _inbox)
 
-            # Check if the inbox is empty.
             if [ -z "$INBOX_CONTENTS" ]; then
               MESSAGE="✅ Your Cortagora inbox is empty. Great job!"
             else
-              # CORRECTED PART: Use $'...' to correctly interpret newline characters.
               HEADER=$'📬 *Cortagora Inbox Triage*\n\nYou have the following items to process:\n'
               
-              FORMATTED_LIST=$(echo "$INBOX_CONTENTS" | sed 's/^/- /')
+              # CORRECTED PART: Wrap each line (the filename) in backticks.
+              # The `&` in the sed command represents the entire matched line.
+              FORMATTED_LIST=$(echo "$INBOX_CONTENTS" | sed 's/^.*$/- `&`/')
               
-              # Combine the parts into the final message.
               MESSAGE="${HEADER}${FORMATTED_LIST}"
             fi
           fi
 
-          # Send the final composed message to Telegram.
-          # The --data-urlencode flag correctly handles the newlines and special characters in the MESSAGE variable.
           curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
           --data-urlencode "chat_id=${CHAT_ID}" \
           --data-urlencode "parse_mode=Markdown" \
