@@ -1,0 +1,26 @@
+**Что (и зачем) читать после классического Бурдье**
+
+| Уровень | Что взять в руки | Почему стоит | Как использовать |
+|---------|------------------|--------------|------------------|
+| **1. Базовый «ремикс» Бурдье** | *Distinction* (1979) + *Homo Academicus* (1984) — читаем избирательно, в паре с русским «Социология социального пространства» | Без первоисточников труднее уловить отличие поля ↔ класса | Читаем с маркером: выписываем виды капитала, чтобы потом «клонировать» их под свои кейсы |
+| **2. Метод-навигаторы** | Loïc Wacquant — *An Invitation to Reflexive Sociology*; David Swartz — *Culture & Power* | Краткий «толкователь» ключевых понятий + гид по операционализации | Открываем, когда нужно превратить термины в переменные опроса/сетевого графа |
+| **3. Новые справочники** | **Bloomsbury Handbook of Bourdieu & Educational Research** (2023)  [oai_citation:0‡Bloomsbury Publishing](https://www.bloomsbury.com/us/bloomsbury-handbook-of-bourdieu-and-educational-research-9781350349179/?utm_source=chatgpt.com) | 45 глав показывают, как работают *поле* и *капиталы* в миграции, лидерстве, грамотности | Берём главы как шаблоны кейс-дизайна (пример: «хабитус мобильного студента») |
+| **4. Пост-Бурдье о цифровом** | - Статья *“Bourdieu revisited: new forms of digital capital”* (2024)  [oai_citation:1‡Taylor & Francis Online](https://www.tandfonline.com/doi/full/10.1080/1369118X.2024.2358170?utm_source=chatgpt.com)  <br>- *Digital Capital: Importance for Social Status* (2024)  [oai_citation:2‡ScienceDirect](https://www.sciencedirect.com/science/article/pii/S0747563224001845?utm_source=chatgpt.com)  <br>- *Social-Media Production Fields & Attention Economy* (2023)  [oai_citation:3‡SAGE Journals](https://journals.sagepub.com/doi/full/10.1177/20563051231193027?utm_source=chatgpt.com) | Развивают «алгоритмический» и «платформенный» капитал; дают метрики ER, watch-time как аналоги объёма тиража | Полезно, если вы анализируете инфлюенсер-экономику или TikTok-Shop |
+| **5. Филд-теория в политике** | *Bringing Bourdieu’s Theory of Fields to Critical Policy Analysis* (2023)  [oai_citation:4‡Amazon](https://www.amazon.com/Bringing-Bourdieus-Critical-Analysis-Advances/dp/1803923997?utm_source=chatgpt.com) [oai_citation:5‡Elgar Online](https://www.elgaronline.com/edcollbook/book/9781803924007/9781803924007.xml?utm_source=chatgpt.com) | Пошагово показывает, как «раскладывать» министерства или НКО на под-поля | Используйте матрицу «позиция-траектория» для картирования акторов |
+| **6. Критика и расширение** | - *Symbolic Violence: Conversations with Bourdieu* (2022)  [oai_citation:6‡SAGE Journals](https://journals.sagepub.com/doi/10.1177/00943061221076191e?icid=int.sj-challenge-page.citing-articles.1&utm_source=chatgpt.com) <br>- **Bourdieu & Sayad Against Empire** (2024) — постколониальный ракурс  [oai_citation:7‡Polity Books](https://www.politybooks.com/bookdetail?book_slug=bourdieu-and-sayad-against-empire-forging-sociology-in-anticolonial-struggle-9781509557851&utm_source=chatgpt.com) | Снимают ограничение «евроцентричности» и добавляют антиколониальный угол | Читайте, если работаете с глобальным Югом или миграцией |
+| **7. Горячие приложения к AI** | Opinion-paper *AI, UBI & Symbolic Violence* (2025)  [oai_citation:8‡Frontiers](https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2025.1488457/pdf) | Показано, как элиты ИИ конвертируют дискурс UBI в символический капитал | Шаблон для анализа «ритуалов» Big Tech |
+| **8. Пространство и город** | *Bourdieu in the Southern, Sustainable, Smart City* (2023)  [oai_citation:9‡SAGE Journals](https://journals.sagepub.com/doi/10.1177/27541258241233493?icid=int.sj-abstract.similar-articles.3&utm_source=chatgpt.com) | Переплетает символическое и материальное планирование в урбанистике | Полезно, если интересуетесь «умными» районами и ESG-риторикой |
+
+---
+
+### Как читать, чтобы не утонуть  
+
+1. **От общего к частному** – сначала метод-навигатор, потом тематические главы или статьи.  
+2. **Связывайте с собственным кейсом**: сразу переводите «капитал» в измеримые прокси (охват, бюджет, разрешительные письма).  
+3. **Следите за типами поля**: политическое, цифровое, образовательное расширяют понятийную сетку по-разному; полезно сравнивать.  
+
+---
+
+### Что не включил и почему  
+
+*Ранние энциклопедии (Grenfell 2012) и тонкие критические обзоры 1990-х пропущены*: они полезны, но дублируют метод-навигаторы в менее актуализированном виде. Если нужен глубинный историографический слой, вернитесь к ним после свежих приложений.
