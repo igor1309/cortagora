@@ -23,20 +23,36 @@ jobs:
           if [ ! -d "_inbox" ]; then
             MESSAGE="Your Cortagora repository does not have an _inbox folder yet."
           else
-            INBOX_ITEMS=$(find _inbox -maxdepth 1 -mindepth 1 -printf "%f\n")
+            # Use find to get modification date (YYYY-MM) and filename, separated by a pipe.
+            # Then sort it in reverse order, so the newest month comes first.
+            # Using -print0 and -z0 handles all special characters in filenames safely.
+            INBOX_ITEMS=$(find _inbox -maxdepth 1 -mindepth 1 -printf "%TY-%Tm|%f\0" | sort -rz)
 
             if [ -z "$INBOX_ITEMS" ]; then
               MESSAGE="✅ Your Cortagora inbox is empty. Great job!"
             else
               HEADER=$'📬 *Cortagora Inbox Triage*\n\nYou have the following items to process:\n'
               FORMATTED_LIST=""
+              CURRENT_MONTH_HEADER=""
 
-              while IFS= read -r item; do
-                if [ -d "_inbox/$item" ]; then
-                  LINE="- \`$item (folder)\`"
-                else
-                  LINE="- \`$item\`"
+              # Loop through each item, reading the date and filename.
+              while IFS='|' read -r -d '' month_key filename; do
+                # Convert YYYY-MM into a human-readable header, e.g., "October 2023".
+                NEW_MONTH_HEADER=$(date -d "${month_key}-01" "+*%-B %Y*")
+                
+                # If the month has changed, print the new header.
+                if [ "$NEW_MONTH_HEADER" != "$CURRENT_MONTH_HEADER" ]; then
+                  FORMATTED_LIST="${FORMATTED_LIST}"$'\n'"${NEW_MONTH_HEADER}"$'\n'
+                  CURRENT_MONTH_HEADER="$NEW_MONTH_HEADER"
                 fi
+
+                # Check if the item is a directory and format the line accordingly.
+                if [ -d "_inbox/$filename" ]; then
+                  LINE="- \`$filename (folder)\`"
+                else
+                  LINE="- \`$filename\`"
+                fi
+                
                 FORMATTED_LIST="${FORMATTED_LIST}${LINE}"$'\n'
               done <<< "$INBOX_ITEMS"
               
@@ -44,7 +60,6 @@ jobs:
             fi
           fi
 
-          # THE FIX: Reverted to the more lenient 'Markdown' parser.
           curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
           --data-urlencode "chat_id=${CHAT_ID}" \
           --data-urlencode "parse_mode=Markdown" \
