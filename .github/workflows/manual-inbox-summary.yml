@@ -1,3 +1,5 @@
+# .github/workflows/manual-inbox-summary.yml
+
 name: Manual Inbox Summary Notifier
 
 on:
@@ -16,31 +18,35 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Prepare and Send Summary
+        env:
+          # Define secrets as environment variables for easier use in the script
+          BOT_TOKEN: ${{ secrets.INBOX_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.INBOX_CHAT_ID }}
         run: |
           # Check if the _inbox directory exists.
           if [ ! -d "_inbox" ]; then
             MESSAGE="Your Cortagora repository does not have an _inbox folder yet."
           else
             # List the contents of the _inbox, one item per line.
-            # This handles files and folders.
             INBOX_CONTENTS=$(ls -1 _inbox)
 
             # Check if the inbox is empty.
             if [ -z "$INBOX_CONTENTS" ]; then
               MESSAGE="✅ Your Cortagora inbox is empty. Great job!"
             else
-              # If not empty, format the message with a header and the list.
-              HEADER="📬 *Cortagora Inbox Triage*\n\nYou have the following items to process:\n"
-              # Prepend each item with a dash for a clean list look.
+              # CORRECTED PART: Use $'...' to correctly interpret newline characters.
+              HEADER=$'📬 *Cortagora Inbox Triage*\n\nYou have the following items to process:\n'
+              
               FORMATTED_LIST=$(echo "$INBOX_CONTENTS" | sed 's/^/- /')
-              MESSAGE="$HEADER\n$FORMATTED_LIST"
+              
+              # Combine the parts into the final message.
+              MESSAGE="${HEADER}${FORMATTED_LIST}"
             fi
           fi
 
           # Send the final composed message to Telegram.
-          # The -s flag silences curl's progress output.
-          # The --data-urlencode flag is used for 'text' to correctly handle newlines and special characters.
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.INBOX_BOT_TOKEN }}/sendMessage" \
-          --data-urlencode "chat_id=${{ secrets.INBOX_CHAT_ID }}" \
+          # The --data-urlencode flag correctly handles the newlines and special characters in the MESSAGE variable.
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+          --data-urlencode "chat_id=${CHAT_ID}" \
           --data-urlencode "parse_mode=Markdown" \
           --data-urlencode "text=${MESSAGE}"
