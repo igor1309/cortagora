@@ -2,7 +2,6 @@
 
 name: Inbox Summary Notifier
 
-# THE CHANGE IS HERE: Added the 'schedule' trigger
 on:
   # This allows the workflow to be triggered on a schedule
   schedule:
