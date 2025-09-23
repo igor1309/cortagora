@@ -1,5 +1,137 @@
 # Comprehensive Analysis of MovieFlo.AI Script Design Workflow - Perplexity
 
+## Prompt
+
+**RESEARCH TASK: Comprehensive Analysis of MovieFlo.AI Script Design Workflow**
+
+**INSTRUCTIONS:**
+
+- Conduct thorough research on [moviefloai.com](http://moviefloai.com)
+- Do not make assumptions about any processes, features, or workflows
+- If information is unclear or missing, explicitly note what could not be verified
+- Ask clarifying questions if the scope needs refinement
+- Provide only factual, verifiable information with source citations where possible
+
+**RESEARCH FOCUS AREAS:**
+
+1. Complete user journey mapping from initial script concept to finished screenplay
+1. Detailed inventory of tools and features available at each stage
+1. Comprehensive analysis of AI assistance mechanisms throughout the writing process
+
+**REQUIRED OUTPUT FORMAT:**
+Produce a structured report with the following sections and extreme detail:
+
+## 1. EXECUTIVE SUMMARY
+
+- Platform overview and core value proposition
+- Key differentiators in the script writing space
+- Primary user workflow summary (2-3 paragraphs)
+
+## 2. USER JOURNEY ANALYSIS
+
+### 2.1 Initial Concept Phase
+
+- Entry points and onboarding process
+- Idea capture and development tools
+- AI assistance in concept refinement
+
+### 2.2 Pre-Writing Phase
+
+- Story structure and outline tools
+- Character development features
+- Research and reference capabilities
+
+### 2.3 Writing Phase
+
+- Script composition interface and features
+- Real-time AI suggestions and feedback
+- Collaboration and version control tools
+
+### 2.4 Revision and Polish Phase
+
+- Editing and refinement tools
+- AI-powered analysis and recommendations
+- Quality assurance features
+
+### 2.5 Finalization and Export Phase
+
+- Formatting and standardization tools
+- Export options and file formats
+- Sharing and distribution capabilities
+
+## 3. TOOLS AND FEATURES INVENTORY
+
+### 3.1 Core Writing Tools
+
+- [Detailed list with functionality descriptions]
+
+### 3.2 AI-Powered Features
+
+- [Specific AI capabilities at each stage]
+
+### 3.3 Collaboration Features
+
+- [Team workflow and sharing tools]
+
+### 3.4 Technical Infrastructure
+
+- [Platform architecture and integrations]
+
+## 4. AI ASSISTANCE MECHANISMS
+
+### 4.1 Concept Development AI
+
+- How AI helps with initial ideation
+- Prompt engineering and idea expansion
+
+### 4.2 Structural AI Support
+
+- Story arc optimization
+- Plot hole detection
+- Pacing analysis
+
+### 4.3 Writing Enhancement AI
+
+- Dialogue improvement suggestions
+- Character voice consistency
+- Scene optimization
+
+### 4.4 Technical AI Features
+
+- Format correction and standardization
+- Industry compliance checking
+- Automated quality metrics
+
+## 5. WORKFLOW INTEGRATION ANALYSIS
+
+- How different phases connect and flow
+- Handoff points between stages
+- Data persistence and continuity
+
+## 6. COMPETITIVE POSITIONING
+
+- How their process differs from traditional screenwriting software
+- Unique AI implementations compared to competitors
+
+## 7. LIMITATIONS AND GAPS
+
+- Features that appear to be missing
+- Areas where information could not be verified
+- Potential workflow bottlenecks
+
+**DETAIL REQUIREMENTS:**
+
+- Include specific feature names, button labels, and interface elements where available
+- Provide step-by-step breakdowns of complex processes
+- Note any pricing, access limitations, or account requirements
+- Include screenshots descriptions or interface layout details if available
+- Cite all sources and note confidence level of information
+
+**RESEARCH METHODOLOGY:**
+Document your research approach, sources consulted, and any limitations encountered during the investigation.
+
+## Output
+
 ## 1. EXECUTIVE SUMMARY
 
 MovieFlo.AI is a comprehensive AI-powered filmmaking platform that transforms the entire video creation process from initial concept to finished production. Developed by Mystic Moose, a Boston-based studio founded by industry veterans from Lucasfilm and ILM, the platform positions itself as an all-in-one solution that eliminates the need to juggle multiple tools and subscriptions for video production[1][2][3].

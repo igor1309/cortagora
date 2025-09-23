@@ -1,5 +1,11 @@
 # MovieFlo.AI: Complete Process Framework and Workflow Analysis - Perplexity
 
+## Prompt
+
+Research and explore, then and explain in full maximum detail moviefloai.com process framework and workflow.
+
+## Output
+
 MovieFlo.AI represents a revolutionary **unified AI-powered filmmaking platform** that transforms the entire video creation process from initial concept to final production. Developed by Mystic Moose, a Boston-based entertainment technology company founded by veterans from **Lucasfilm** and **Industrial Light & Magic (ILM)**, this platform integrates decades of cinematic production experience into an intuitive, comprehensive workflow[1][2][3].
 
 ## Core Platform Architecture and Philosophy

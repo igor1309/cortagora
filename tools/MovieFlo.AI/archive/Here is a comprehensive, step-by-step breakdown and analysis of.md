@@ -2,6 +2,26 @@ Perplexity
 
 Here is a comprehensive, step-by-step breakdown and analysis of the moviefloai.com platform, synthesizing and detailing every stage, resource, and feature as presented on the official website and support materials.
 
+## Prompt
+
+Research and analyze the official website **moviefloai.com** exclusively. Explore every available page, section, and resource within the site. Provide a **comprehensive, step-by-step explanation** of its process framework and workflow, covering in full detail:
+
+1. **Project initiation** – how a user starts, including signup, project creation, and initial setup.  
+2. **Concept development** – tools for briefs, scripts, synopsis generation, and scene breakdowns.  
+3. **Creative controls** – options for story structure, genre, tone, style, and aspect ratio.  
+4. **Asset creation** – how actors, characters, storyboards, and visual references are generated or customized.  
+5. **Scene and shot design** – description of storyboard and scene management, including regeneration/editing features.  
+6. **Video generation** – workflow for producing clips, previews, and AI-based outputs.  
+7. **Editing and assembly** – timeline editor, clip management, audio integration, lip-sync, and previews.  
+8. **Export options** – final outputs (video, assets, XML, covers/posters) and supported formats.  
+9. **Plans and credits** – details on free vs. paid features, credit consumption, and limits.  
+10. **Guides and tutorials** – any documented instructions or step-by-step workflows provided on the site.  
+11. **Overall framework** – synthesize how the site organizes the entire production pipeline from idea to finished video.
+
+When writing your answer, use **maximum depth, specificity, and completeness**, ensuring no step or option described on the site is skipped. Structure the explanation clearly with **headings, sub-sections, and ordered steps**, so that the full workflow is transparent and easy to follow.
+
+## Output
+
 ## Project Initiation
 
 ### Account Signup and Project Creation

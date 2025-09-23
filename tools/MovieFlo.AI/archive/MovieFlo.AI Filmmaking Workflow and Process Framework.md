@@ -1,5 +1,23 @@
 # MovieFlo.AI Filmmaking Workflow and Process Framework - ChatGPT-5
 
+## Prompt
+
+Research and analyze the official website **moviefloai.com** exclusively. Explore every available page, section, and resource within the site. Provide a **comprehensive, step-by-step explanation** of its process framework and workflow, covering in full detail:
+
+1. **Project initiation** – how a user starts, including signup, project creation, and initial setup.  
+2. **Concept development** – tools for briefs, scripts, synopsis generation, and scene breakdowns.  
+3. **Creative controls** – options for story structure, genre, tone, style, and aspect ratio.  
+4. **Asset creation** – how actors, characters, storyboards, and visual references are generated or customized.  
+5. **Scene and shot design** – description of storyboard and scene management, including regeneration/editing features.  
+6. **Video generation** – workflow for producing clips, previews, and AI-based outputs.  
+7. **Editing and assembly** – timeline editor, clip management, audio integration, lip-sync, and previews.  
+8. **Export options** – final outputs (video, assets, XML, covers/posters) and supported formats.  
+9. **Plans and credits** – details on free vs. paid features, credit consumption, and limits.  
+10. **Guides and tutorials** – any documented instructions or step-by-step workflows provided on the site.  
+11. **Overall framework** – synthesize how the site organizes the entire production pipeline from idea to finished video.
+
+When writing your answer, use **maximum depth, specificity, and completeness**, ensuring no step or option described on the site is skipped. Structure the explanation clearly with **headings, sub-sections, and ordered steps**, so that the full workflow is transparent and easy to follow.
+
 ## Project Initiation – Signup and New Project Setup
 
  **Creating an Account and Starting a Project:** To use MovieFlo.AI, users first **sign up for an account** (using a Google login or email/password) [oai_citation:0‡moviefloai.com](https://www.moviefloai.com/tutorial-guide#:~:text=First%20thing%20you%20will%20need,all%20there%20is%20to%20it). Once logged in, you can initiate a new project from the **Explore** dashboard by clicking “**Create New Project**” (also labeled **“Concept to Video”** in the app) [oai_citation:1‡moviefloai.com](https://www.moviefloai.com/tutorial-guide#:~:text=1,or%20Concept%20to%20Video%20button). This opens a guided project setup interface (shown above) where you configure the initial project settings. Key steps and options in project initiation include:

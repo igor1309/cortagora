@@ -1,5 +1,25 @@
 # MovieFlo.AI Complete Workflow Analysis - Claude Sonnet 4
 
+# Prompt
+
+Research and analyze the official website **moviefloai.com** exclusively. Explore every available page, section, and resource within the site. Provide a **comprehensive, step-by-step explanation** of its process framework and workflow, covering in full detail:
+
+1. **Project initiation** – how a user starts, including signup, project creation, and initial setup.
+1. **Concept development** – tools for briefs, scripts, synopsis generation, and scene breakdowns.
+1. **Creative controls** – options for story structure, genre, tone, style, and aspect ratio.
+1. **Asset creation** – how actors, characters, storyboards, and visual references are generated or customized.
+1. **Scene and shot design** – description of storyboard and scene management, including regeneration/editing features.
+1. **Video generation** – workflow for producing clips, previews, and AI-based outputs.
+1. **Editing and assembly** – timeline editor, clip management, audio integration, lip-sync, and previews.
+1. **Export options** – final outputs (video, assets, XML, covers/posters) and supported formats.
+1. **Plans and credits** – details on free vs. paid features, credit consumption, and limits.
+1. **Guides and tutorials** – any documented instructions or step-by-step workflows provided on the site.
+1. **Overall framework** – synthesize how the site organizes the entire production pipeline from idea to finished video.
+
+When writing your answer, use **maximum depth, specificity, and completeness**, ensuring no step or option described on the site is skipped. Structure the explanation clearly with **headings, sub-sections, and ordered steps**, so that the full workflow is transparent and easy to follow.
+
+## Output
+
 MovieFlo.AI represents a comprehensive AI-powered filmmaking platform that transforms concepts into finished videos through an integrated “One Flo” creative pipeline.  Developed by Mystic Moose, a Boston-based company founded by entertainment veterans from Lucasfilm, ILM, and Electronic Arts, the platform democratizes video creation by eliminating the need to juggle multiple tools and complex prompts. 
 
 ## 1. Project Initiation – Getting Started
