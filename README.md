@@ -1,77 +1,101 @@
-## The Library's Layout
-
-```code
-/
-├── protocols/
-│   └── CORE_PROTOCOL.md￼
-│
-├── modalities/
-│   └── Brainstorming prompt (5).md
-│   └── ... (other modality files)
-│
-├── personas/
-│   └── ПЕРСОНЫ Тони Гилрой.md
-│   └── ... (other persona files)
-│
-├── lore/
-│   ├── project-alpha/
-│   │   ├── bible.md          (Core rules, tone, themes)
-│   │   ├── characters/
-│   │   │   └── main_character.md
-│   │   ├── locations/
-│   │   └── timeline.md
-│   └── project-beta/
-│       └── ... (similar structure for another world)
-│
-├── domains/
-│   ├── 01-character-theory/
-│   │   ├── the-hero-journey.md
-│   │   └── moral-compromise-framework.md
-│   ├── 02-structure-and-pacing/
-│   │   ├── three-act-structure.md
-│   │   └── non-linear-narratives.md
-│   ├── 03-dialogue/
-│   │   └── subtext-in-conversation.md
-│   ├── 04-marketing/
-│   │   └── crafting-a-logline.md
-│
-└── semi-RAG/  (The "Workshop" table, where you assemble things)
-    └── ... (Your temporary ticket folders go here)
-```
-
+---
+date: 2026-01-09
+model: gpt-5.2
+description: "repo root README.md"
 ---
 
-## Knowledge Management Workflow
+# cortagora
 
-This repository follows a structured, two-stage process for managing information, designed to balance frictionless idea capture with long-term organization.
+Монорепозиторий знаний и материалов для разработки художественных проектов и AI-ассистентов сценариста.
 
-### Phase 1: Frictionless Capture (`_inbox`)
+Репозиторий многослойный:
+- **framework**: домены, протоколы, модальности, персоны и методички
+- **works**: конкретные произведения/проекты (фильм/сериал/роман/сезон и т.п.)
+- **world**: глобальный слой world-material (worldbuilding layer; не обязательно консистентный канон)
+- **tools**: утилиты и рабочие эксперименты
 
-The `_inbox` folder at the root of the repository is the designated, temporary landing zone for all new, unprocessed information.
+Порядок в репозитории строится на двух правилах:
+- **presence-based**: папки и файлы существуют только если есть контент
+- **nearest wins**: локальный уровень переопределяет глобальный
 
-*   **Purpose:** To capture ideas, notes, links, and research with zero friction.
-*   **Workflow:** When an idea strikes, especially on the go, create a new file in `_inbox`. Do not worry about perfect naming or placement. The goal is to get the information out of your head and into the system quickly.
+## Quick navigation
 
-### Phase 2: Triage & Co-location
+- `works/` — проекты/произведения (нормализованные slug-имена: `winter-shadow`, `deceptor`, `blackchain`, …)
+- `world/` — глобальный world-material (надпроектный; worldbuilding layer)
+- `domains/` — предметные области и рамки (например: архетипы, Пропп, переговоры)
+- `protocols/` — протоколы взаимодействия и рабочие стандарты
+- `modalities/` — режимы работы (analysis/brainstorm/…)
+- `personas/` — персоны и стилевые профили
+- `writing/` — методички по нарративу/сценарной технике
+- `tools/` — утилиты, генераторы, служебные скрипты
+- `_inbox/` — входящее (сырьё до разборки)
+- `logs/` — логирование и заметки процесса
 
-The `_inbox` is not a permanent home for files. On a regular basis, its contents must be triaged and processed.
+Подробные правила структуры: `ARCHITECTURE.md`.
 
-*   **Purpose:** To ensure every piece of information is evaluated and moved to a context-aware location.
-*   **Workflow:** During a review session, each item in the `_inbox` is handled with one of three actions:
-    1.  **Delete:** If the idea is no longer relevant.
-    2.  **Merge:** If the content is a small addition to an existing canonical document.
-    3.  **Move:** If the item is a valuable, standalone piece of work-in-progress.
+## What is a work
 
-### Phase 3: Structured Placement (WIP Folders)
+**Work** — единица ответственности: отдельное произведение или самостоятельная часть произведения,
+которая требует собственного контекста (тип/жанр/ЦА/конфликт/персонажи/структура/тон/мир).
 
-Items moved from the `_inbox` are placed in staging folders co-located with the canonical documents they relate to. We use a consistent naming convention for these folders, prefixed with an underscore (`_`):
+Work начинается там, где есть `Work.md`.
 
-*   `_ideas`: For nascent concepts and brainstorming notes.
-*   `_research`: For supporting articles, data, and external links.
-*   `_archive`: For deprecated versions of documents or obsolete ideas that should be preserved.
+Work может иметь собственные папки `world/`, `research/`, `sandbox/` (или `_ideas/`) и `story/` — при наличии контента.
+Если уровней несколько (например, work и сезон), применяется nearest wins.
 
-These folders exist within the primary directories (`lore`, `domains`, `brand`, etc.), ensuring that work-in-progress materials are always kept in context.
+## Typical work layout (example)
 
-**Example:** An unprocessed idea about a character in Project Alpha would follow this path:
-1.  **Capture:** `/_inbox/note-about-character-secret.md`
-2.  **Triage & Move:** ` /lore/project-alpha/characters/_ideas/secret-backstory.md`
+`works/<work>/`
+- `Work.md` — якорь scope
+- `world/` — world-material этого work (опционально)
+- `story/` — сцены/синопсисы/черновики (опционально)
+- `_ideas/`, `_research/`, `_archive/`, `_inspo/` — co-located WIP (опционально)
+- `s01/` — вложенный scope (опционально; имеет свой `Work.md`)
+
+## Knowledge workflow
+
+Этот репозиторий следует простому циклу: capture → triage → co-location.
+
+### Phase 1: Frictionless capture (`_inbox/`)
+
+`_inbox/` — временная landing zone для новых, неразобранных материалов.
+
+- Purpose: фиксировать идеи, ссылки, заметки, выжимки без трения.
+- Rule: сначала создать файл, позже довести имя/место.
+
+### Phase 2: Triage & co-location
+
+`_inbox/` не является постоянным домом. Во время ревью каждый элемент получает одно из действий:
+1) Delete — больше не актуально
+2) Merge — небольшое добавление в существующий документ
+3) Move — ценный самостоятельный WIP
+
+### Phase 3: Co-located WIP folders (underscore folders)
+
+Переносите материал рядом с тем контекстом, к которому он относится, используя underscore-папки:
+
+- `_ideas/` — варианты, наброски, опции
+- `_research/` — источники, выжимки, ссылки, справки
+- `_archive/` — устаревшие версии, которые нужно сохранить
+- `_inspo/` — вдохновение, клиппинги, mood/reference (опционально)
+
+Эти папки могут существовать на любом уровне scope (root / work / season) и появляются только при необходимости.
+
+**Example (Deceptor S01):**
+1) Capture: `/_inbox/note-about-character-secret.md`
+2) Move: `/works/deceptor/s01/_ideas/secret-backstory.md`
+   или (если это world-material): `/works/deceptor/s01/world/_ideas/secret-backstory.md`
+
+## Naming (soft)
+
+Жёсткий style guide не вводится, но для новых директорий рекомендуется:
+- `lowercase` и `kebab-case` для папок и “узловых” файлов навигации
+- внутри проектов допускаются русские имена файлов (исторически накопленные и новые)
+
+## Migration note
+
+Исторически часть проектов находится вне `works/`.
+Миграция выполняется постепенно:
+- создаётся `works/` как новая точка входа
+- проекты переносятся по одному (без массовых переименований файлов)
+- `lore/` переименовывается в `world/`
