@@ -1,5 +1,8 @@
 # Cortagora Log
 
+## 2026-01-09
+Significant re-org: split `lore` into structured `works` subfolders.
+
 ## 2025-08-16
 
 **Knowledge Management & Automation**
