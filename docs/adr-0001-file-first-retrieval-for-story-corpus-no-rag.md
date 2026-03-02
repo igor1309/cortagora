@@ -17,13 +17,14 @@ retrieval architecture based on lexical search (grep-style) and targeted
 section reads, without embeddings or vector indexing.
 
 The decision prioritizes operational simplicity, determinism,
-transparency, and high mutation tolerance of a Markdown corpus.
+transparency, and high mutation tolerance of a Markdown corpus of
+approximately 100–1000 files.
 
 This ADR explicitly acknowledges reduced capability in vague,
 emotional, conceptual, and interpretive semantic discovery as an
 accepted tradeoff.
 
-Scope: local-only corpus, 100–1000 Markdown files, read-only agents,
+Scope: local-only corpus, read-only agents,
 no automatic prose generation, no vector database.
 
 ---
@@ -41,9 +42,10 @@ The system operates on a writer-maintained Markdown corpus containing:
 Constraints:
 
 - High mutation frequency (frequent edits)
+- Corpus size within 100–1000 Markdown files
 - No desire for embedding pipelines or reindexing
 - Strict separation of concerns:
-  - Orchestrator agent
+  - Orchestrator agent (control plane)
   - Corpus scout (local search only)
   - Web scout (external search only)
   - Prose agent (separate responsibility)
@@ -51,12 +53,14 @@ Constraints:
 
 Rejected alternative:
 
-Vector-based RAG retrieval was rejected due to:
+Vector-based RAG retrieval was rejected primarily because:
 
-- Re-indexing overhead
-- Embedding drift
-- Reduced transparency of evidence origin
-- Operational complexity disproportionate to corpus size
+- The corpus size (100–1000 files) is within practical brute-force lexical search range.
+- Mutation velocity makes embedding maintenance undesirable.
+- Transparency of evidence origin is reduced in vector-based systems.
+- Operational complexity is disproportionate to scale.
+
+If corpus size materially exceeds this range, this rejection MAY require reassessment.
 
 ---
 
@@ -76,6 +80,7 @@ The system SHALL accept that:
 - Retrieval quality depends on lexical overlap.
 - Abstract semantic similarity is not guaranteed.
 - Query expansion relies on heuristic term inference.
+- Multilingual semantic paraphrase detection is weaker than embedding-based retrieval.
 
 This limitation is intentional and accepted.
 
@@ -99,12 +104,17 @@ This limitation is intentional and accepted.
    - MUST NOT override canon.
    - MUST remain separate from corpus evidence.
 
-4. Retrieval depth:
+4. Retrieval depth control:
    - MUST be configurable at runtime.
-   - MUST support progressive deepening.
-   - MUST allow bounded near-sweep behavior within scope.
+   - Progressive deepening decisions MUST be owned by the orchestrator, not the corpus scout.
+   - The corpus scout MUST remain a deterministic retrieval primitive.
 
-5. Output from corpus scout:
+5. Bounded near-sweep behavior:
+   - A near-sweep is defined as reading all files within the declared scope,
+     subject to configured maximum limits (files, sections, or total lines).
+   - Near-sweep MUST remain bounded and explicitly triggered.
+
+6. Output from corpus scout:
    - MUST contain only structured findings:
      - facts
      - constraints
@@ -125,9 +135,7 @@ query classes:
 - Emotional pattern detection
 - Conceptual or thematic mining
 - Interpretive or latent meaning exploration
-
-Semantic paraphrase detection across languages is weaker than
-embedding-based retrieval.
+- Cross-language semantic paraphrase discovery
 
 ### Operational Gains
 
@@ -140,8 +148,13 @@ embedding-based retrieval.
 
 ### Future Extension Point
 
-If corpus size or query patterns evolve toward abstract or thematic
-exploration, a separate ADR MAY introduce a hybrid semantic layer.
+If:
+
+- Corpus scale materially increases beyond current assumptions, or
+- Abstract/thematic retrieval becomes a primary use case, or
+- File-first retrieval failure becomes structurally recurrent,
+
+a separate ADR MAY introduce a hybrid semantic layer.
 
 Such extension MUST NOT silently alter this decision.
 
