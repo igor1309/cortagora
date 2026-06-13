@@ -35,5 +35,9 @@ No automated tests are defined. Validation is manual: ensure files are placed un
 Recent history uses short, descriptive subject lines (often just the file/topic); both English and Russian are used. No strict prefixing or ticket format is evident.
 For PRs, include: a brief summary, affected scopes (e.g., `works/deceptor/s01`), and any canon decisions or structural changes. Add examples or screenshots if you introduce new templates or workflows.
 
+## Corpus
+
+The `works/BLKCHN` corpus contains story materials (drafts, notes, world-building). Use corpus-scout MCP tools (`search`, `read_section`) to look up facts before answering questions or making changes. Never invent story details — check the corpus first.
+
 ## Architecture Notes
 Scope is defined by the nearest `Work.md` (project/season/other). Presence‑based folders mean “data exists here”; absence means “no data at this level.” When resolving conflicts, nearest scope wins.
