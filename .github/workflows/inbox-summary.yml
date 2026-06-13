@@ -5,8 +5,8 @@ name: Inbox Summary Notifier
 on:
   # This allows the workflow to be triggered on a schedule
   schedule:
-    - cron: '0 2 * * 6' # Saturday at 2:00 AM UTC
-    - cron: '0 2 * * 0' # Sunday at 2:00 AM UTC
+    - cron: '0 2 * * 6' # Saturday 02:00 UTC / 05:00 Europe/Moscow
+    - cron: '0 2 * * 0' # Sunday 02:00 UTC / 05:00 Europe/Moscow
 
   # This allows the workflow to be triggered manually from the GitHub Actions tab
   workflow_dispatch:
@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Prepare and Send Summary
         env:
@@ -31,32 +33,93 @@ jobs:
           if [ ! -d "_inbox" ]; then
             MESSAGE="Your Cortagora repository does not have an _inbox folder yet."
           else
-            FORMATTED_LIST=$(
-              CURRENT_MONTH_HEADER=""
-              find _inbox -maxdepth 1 -mindepth 1 -printf "%TY-%Tm|%f\0" | sort -rz | \
-              while IFS='|' read -r -d '' month_key filename; do
-                NEW_MONTH_HEADER=$(date -d "${month_key}-01" "+%-B %Y")
-                
-                if [ "$NEW_MONTH_HEADER" != "$CURRENT_MONTH_HEADER" ]; then
-                  echo ""
-                  echo "$NEW_MONTH_HEADER"
-                  echo "--------------------"
-                  CURRENT_MONTH_HEADER="$NEW_MONTH_HEADER"
-                fi
+            declare -A ITEM_KINDS
 
-                if [ -d "_inbox/$filename" ]; then
-                  echo "- $filename (folder)"
-                else
-                  echo "- $filename"
-                fi
-              done
-            )
+            while IFS= read -r -d '' path; do
+              relative_path="${path#_inbox/}"
+              item_name="${relative_path%%/*}"
 
-            if [ -z "$FORMATTED_LIST" ]; then
+              if [[ "$relative_path" == */* ]]; then
+                ITEM_KINDS["$item_name"]="folder"
+              elif [[ -z "${ITEM_KINDS[$item_name]+x}" ]]; then
+                ITEM_KINDS["$item_name"]="file"
+              fi
+            done < <(git -c core.quotePath=false ls-files -z -- _inbox)
+
+            if [ "${#ITEM_KINDS[@]}" -eq 0 ]; then
               MESSAGE="✅ Your Cortagora inbox is empty. Great job!"
             else
+              RECENT_ITEMS="$(mktemp)"
+              PREVIOUS_ITEMS="$(mktemp)"
+              CUTOFF_EPOCH="$(date -u -d "7 days ago" +%s)"
+
+              for item_name in "${!ITEM_KINDS[@]}"; do
+                item_kind="${ITEM_KINDS[$item_name]}"
+
+                if [ "$item_kind" = "folder" ]; then
+                  first_added_at="$(git log --diff-filter=A --format=%aI -- "_inbox/$item_name" | tail -n 1)"
+                else
+                  first_added_at="$(git log --diff-filter=A --follow --format=%aI -- "_inbox/$item_name" | tail -n 1)"
+                fi
+
+                if [ -z "$first_added_at" ]; then
+                  first_added_at="1970-01-01T00:00:00+00:00"
+                fi
+
+                first_added_epoch="$(date -u -d "$first_added_at" +%s)"
+                if [ "$first_added_epoch" -ge "$CUTOFF_EPOCH" ]; then
+                  printf "%s\t%s\t%s\n" "$first_added_at" "$item_name" "$item_kind" >> "$RECENT_ITEMS"
+                else
+                  printf "%s\t%s\t%s\n" "$first_added_at" "$item_name" "$item_kind" >> "$PREVIOUS_ITEMS"
+                fi
+              done
+
+              FORMATTED_LIST=$(
+                echo "Last 7 days"
+                echo "--------------------"
+
+                if [ -s "$RECENT_ITEMS" ]; then
+                  sort -r "$RECENT_ITEMS" | while IFS=$'\t' read -r first_added_at item_name item_kind; do
+                    first_added_date="$(date -u -d "$first_added_at" "+%Y-%m-%d")"
+
+                    if [ "$item_kind" = "folder" ]; then
+                      echo "- $first_added_date - $item_name (folder)"
+                    else
+                      echo "- $first_added_date - $item_name"
+                    fi
+                  done
+                else
+                  echo "- No new inbox items"
+                fi
+
+                echo ""
+                echo "Previous backlog"
+                echo "--------------------"
+
+                if [ -s "$PREVIOUS_ITEMS" ]; then
+                  previous_total="$(wc -l < "$PREVIOUS_ITEMS" | tr -d ' ')"
+                  previous_files="$(awk -F '\t' '$3 == "file" { count++ } END { print count + 0 }' "$PREVIOUS_ITEMS")"
+                  previous_folders="$(awk -F '\t' '$3 == "folder" { count++ } END { print count + 0 }' "$PREVIOUS_ITEMS")"
+                  oldest_added_at="$(sort "$PREVIOUS_ITEMS" | head -n 1 | cut -f 1)"
+                  oldest_added_date="$(date -u -d "$oldest_added_at" "+%Y-%m-%d")"
+
+                  echo "$previous_total items total"
+                  echo "- $previous_files files"
+                  echo "- $previous_folders folders"
+                  echo "- Oldest first-add: $oldest_added_date"
+                  echo ""
+                  echo "By first-add month"
+                  cut -f 1 "$PREVIOUS_ITEMS" | cut -c 1-7 | sort -r | uniq -c | while read -r count month_key; do
+                    month_label="$(date -u -d "${month_key}-01" "+%B %Y")"
+                    echo "- $month_label: $count items"
+                  done
+                else
+                  echo "- No older inbox items"
+                fi
+              )
+
               HEADER=$'📬 *Cortagora Inbox Triage*\n\nYou have the following items to process:\n'
-              MESSAGE="${HEADER}"$'```'"${FORMATTED_LIST}"$'\n```'
+              MESSAGE="${HEADER}"$'```\n'"${FORMATTED_LIST}"$'\n```'
             fi
           fi
 

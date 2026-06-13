@@ -1,5 +1,8 @@
 # Cortagora Log
 
+## 2026-06-13
+- Made the inbox Telegram summary reliable by using Git first-add dates instead of checkout filesystem mtimes; the report now shows a rolling 7-day full list and summarizes older backlog.
+
 ## 2026-01-09
 Significant re-org: split `lore` into structured `works` subfolders.
 
