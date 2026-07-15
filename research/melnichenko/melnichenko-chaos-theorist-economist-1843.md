@@ -7,7 +7,7 @@ author: Arkady Ostrovsky
 url: https://www.economist.com/1843/2026/07/09/a-top-russian-oligarch-breaks-the-silence
 published: 2026-07-09
 print-headline: "The chaos theorist"
-tags: [inspo, oligarch, melnichenko, russia, power, prototype]
+tags: [research, oligarch, melnichenko, russia, power, prototype]
 related:
   - melnichenko-why-a-broken-russia-is-bad-for-the-world.md
   - melnichenko-oferta-shulman-plushev-transcript.md

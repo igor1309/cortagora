@@ -6,7 +6,7 @@ source: The Economist, By Invitation
 author: Andrey Melnichenko
 url: https://www.economist.com/by-invitation/2026/07/09/why-a-broken-russia-is-bad-for-the-world
 published: 2026-07-09
-tags: [inspo, oligarch, melnichenko, russia, sovereignty, essay]
+tags: [research, oligarch, melnichenko, russia, sovereignty, essay]
 related:
   - melnichenko-chaos-theorist-economist-1843.md
   - melnichenko-oferta-shulman-plushev-transcript.md
