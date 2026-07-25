@@ -7,16 +7,7 @@ description: "Contributor guide for the cortagora repository"
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a knowledge base for creative projects and AI‑assistant materials. Core layers:
-- `works/` — individual projects/works (primary unit of responsibility).
-- `world/` — global world‑material (not canon).
-- `research/` — cross‑project references, studies, digests.
-- `framework/` — reusable thinking tools: `domains/`, `protocols/`, `modalities/`, `personas/`, `writing/`.
-- `_inbox/` — temporary intake for unsorted material (must be triaged).
-- `semi-RAG/` — workshop tickets/experiments.
-- `tools/` — utilities/scripts; `docs/`, `brand/`, `logs/` are supporting areas.
-
-Authoritative structure rules live in `ARCHITECTURE.md`; workflow overview is in `README.md`.
+Repository structure — layers, scope, presence‑based folders, nearest‑wins, and the `research/` · `inspo/` · `sandbox/` distinction — is defined authoritatively in `ARCHITECTURE.md`; workflow overview is in `README.md`. Read `ARCHITECTURE.md` before placing files or reasoning about structure. It is the single source of truth and is intentionally not paraphrased here.
 
 ## Build, Test, and Development Commands
 There is no build or test system. Most work is Markdown and assets.
@@ -38,6 +29,3 @@ For PRs, include: a brief summary, affected scopes (e.g., `works/deceptor/s01`),
 ## Corpus
 
 The `works/BLKCHN` corpus contains story materials (drafts, notes, world-building). Use corpus-scout MCP tools (`search`, `read_section`) to look up facts before answering questions or making changes. Never invent story details — check the corpus first.
-
-## Architecture Notes
-Scope is defined by the nearest `Work.md` (project/season/other). Presence‑based folders mean “data exists here”; absence means “no data at this level.” When resolving conflicts, nearest scope wins.
