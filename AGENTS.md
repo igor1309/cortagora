@@ -19,6 +19,21 @@ There is no build or test system. Most work is Markdown and assets.
 - Prefer `kebab-case` for new directories and “navigation” files; Russian filenames are acceptable inside project content.
 - Use co‑located underscore folders for WIP (`_ideas/`, `_research/`, `_archive/`, `_inspo/`).
 
+### TL;DR for long captures
+
+A captured note (clipping, interview, transcript, research digest) whose body runs longer than roughly 60 lines or four `##` sections opens with a `## TL;DR` section. Shorter notes do not — for those the `why` front‑matter field already does the job, and a second layer of summary is noise.
+
+Placement and content:
+
+- `## TL;DR` is the first `##` section: after the `#` title and the one‑paragraph lead saying who said this, to whom and when — before the body.
+- It carries **only what the source states**. Keep your own reading in a separate trailing section (e.g. `## Мои выводы (не источник)`), and say so in one line inside the TL;DR.
+- It does not replace `why`. `why` is why this material matters to us; TL;DR is what the material says. The two are written from different angles on purpose.
+- Bullets, not prose. Numbers, dates and direct quotes belong here — that is what gets re‑read.
+
+This applies to new captures. Do not retrofit existing files just to satisfy the rule; add a TL;DR when you are editing such a file for other reasons anyway.
+
+Worked example: `works/zero-day-censorship/inspo/ркн-против-amnezia-vpn-2026.md`.
+
 ## Testing Guidelines
 No automated tests are defined. Validation is manual: ensure files are placed under the correct scope, links resolve, and `_inbox/` items are triaged or moved.
 
