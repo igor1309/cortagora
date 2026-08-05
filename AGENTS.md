@@ -41,6 +41,26 @@ No automated tests are defined. Validation is manual: ensure files are placed un
 Recent history uses short, descriptive subject lines (often just the file/topic); both English and Russian are used. No strict prefixing or ticket format is evident.
 For PRs, include: a brief summary, affected scopes (e.g., `works/deceptor/s01`), and any canon decisions or structural changes. Add examples or screenshots if you introduce new templates or workflows.
 
+## Issue Tracking
+
+Issues for this repository live in **Multica**, workspace `cortagora`, and are used via the installed `multica` CLI. Issue keys use the `COR-` prefix; commits that close an issue may lead with it (e.g. `COR-18: preserve Countess beyond a single explanation`).
+
+The CLI's globally configured workspace is **not** cortagora, so every command must target the workspace explicitly — otherwise it silently operates on another workspace's issues:
+
+```sh
+export MULTICA_WORKSPACE_ID=f0ace115-39e3-445c-8853-5f07bfd4609a   # workspace "cortagora"
+multica issue list
+multica issue create --title "…" --description-stdin < body.md
+```
+
+Or pass `--workspace-id f0ace115-39e3-445c-8853-5f07bfd4609a` per command.
+
+Notes:
+
+- Verify the target before creating: `multica issue list --limit 5` must return `COR-*` keys.
+- Multi-line or Russian descriptions: use `--description-stdin` (or `--description-file`), not `--description`.
+- Agents available as assignees: `multica agent list`. There are no projects or labels defined in this workspace.
+
 ## Corpus
 
 The `works/BLKCHN` corpus contains story materials (drafts, notes, world-building). Use corpus-scout MCP tools (`search`, `read_section`) to look up facts before answering questions or making changes. Never invent story details — check the corpus first.
