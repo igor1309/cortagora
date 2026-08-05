@@ -1,3 +1,9 @@
+---
+date: 2025-06-30
+model: unknown
+description: "Сводка проекта The BlackChain: логлайн, тема, ключевые силы, устройство мира"
+---
+
 # The BlackChain
 
 **Сводка Проекта**
