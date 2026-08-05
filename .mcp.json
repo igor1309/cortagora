@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "corpus-scout": {
+      "command": "node",
+      "args":
+["/Users/igormalyarov/Developer/my-apps/ai-labs/ai-labs/corpus-scout/src/index.js"],
+      "env": {
+        "CORPUS_ROOT": "/Users/igormalyarov/Developer/my-apps/cortagora/works/BLKCHN"
+      }
+    }
+  }
+}

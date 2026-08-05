@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "mcp__corpus-scout__search",
+      "mcp__corpus-scout__read_section"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "corpus-scout"
+  ],
+  "enableAllProjectMcpServers": true
 }

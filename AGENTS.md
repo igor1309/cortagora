@@ -61,6 +61,23 @@ Notes:
 - Multi-line or Russian descriptions: use `--description-stdin` (or `--description-file`), not `--description`.
 - Agents available as assignees: `multica agent list`. There are no projects or labels defined in this workspace.
 
+### Assigning to an agent
+
+`multica issue assign <KEY> --to-id <agent-uuid>` **dispatches the agent immediately** — there is no queue-without-running step. So the issue must be complete before it is assigned: finish the description first, assign last. Editing the description afterwards does not reach a run already in flight.
+
+To fix an issue that was assigned too early:
+
+```sh
+multica issue runs <KEY> --full-id                     # short prefixes are rejected
+multica issue cancel-task <full-run-uuid> --issue <KEY>
+multica issue update <KEY> --description-stdin < body.md
+multica issue rerun <KEY>
+```
+
+### Source material goes inline
+
+An agent runs in its own workdir and cannot be assumed to read paths outside the repository (iCloud, Desktop, another checkout), and the CLI has **no attachment support**. Paste the full source text into the description inside a fenced block rather than linking to a local path — the issue is the only carrier. Keep the original URL and date in the text so the eventual capture can cite them.
+
 ## Corpus
 
 The `works/BLKCHN` corpus contains story materials (drafts, notes, world-building). Use corpus-scout MCP tools (`search`, `read_section`) to look up facts before answering questions or making changes. Never invent story details — check the corpus first.
