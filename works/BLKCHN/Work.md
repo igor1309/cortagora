@@ -37,3 +37,4 @@ description: "Work scope for The BlackChain"
 - Story: `story/`.
 - Sandbox: `sandbox/`.
 - Process: `process/`.
+- Структурная рамка сезона: `sandbox/илиада-как-структура-сезона.md` (применение) и `../../framework/domains/Илиада/илиада-как-нарративная-грамматика.md` (надпроектная методика); вытекающие задачи — `TODO/TODO-илиада-правки-структуры.md`.

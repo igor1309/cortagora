@@ -12,6 +12,7 @@
 
 | Имя Персоны | Ключевая компетенция | Ссылка на файл |
 | :--- | :--- | :--- |
+| **Room Runner** | Оркестрация Writers Room, выбор модальности, состава и следующего прохода без присвоения функций шоураннера. | [`room-runner.md`](./room-runner.md) |
 | **Тони Гилрой** | Системный реализм, психология, механика власти. | [`persona-tony-gilroy-profile.md`](./persona-tony-gilroy-profile.md) |
 | **Мишель Кинг** | Психологическая драма, сильные женские персонажи, этика. | [`persona-michelle-king-profile.md`](./persona-michelle-king-profile.md) |
 | **Дэвид Саймон** | Документальный реализм, критика систем, "взгляд снизу". | [`persona-david-simon-profile.md`](./persona-david-simon-profile.md) |
