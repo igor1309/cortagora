@@ -15,6 +15,7 @@ There is no build or test system. Most work is Markdown and assets.
 
 ## Coding Style & Naming Conventions
 - Markdown docs should include front‑matter with `date`, `model`, and `description`.
+- `model:` names the model that wrote **this** file. Never copy it from a neighbouring file or from the root documents — it belongs to the author, not to the genre. Write the identity you are running under; if you cannot establish it, say so in the file rather than substituting a plausible name. The root documents carry `model: gpt-5.2` because that is who wrote them in January 2026; an agent that copies that stamp files a false provenance record.
 - Use real Markdown headings: exactly one `#` title per file, then `##`/`###`.
 - Prefer `kebab-case` for new directories and “navigation” files; Russian filenames are acceptable inside project content.
 - Use co‑located underscore folders for WIP (`_ideas/`, `_research/`, `_archive/`, `_inspo/`).
