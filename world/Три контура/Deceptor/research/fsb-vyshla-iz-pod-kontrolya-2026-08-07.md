@@ -1,11 +1,11 @@
 ---
 date: 2026-08-07
-model: gpt-5.2
+model: MiniMax-M3
 description: "«Агентство» (Telegram) со ссылкой на Bloomberg: российская элита опасается, что ФСБ вышла из-под контроля; Вторая служба получила карт-бланш на репрессии; Дурову предъявлено обвинение в терроризме вопреки Кремлю; Кириенко теряет влияние; взрыв в Balzi Rossi 1 августа укрепил позиции силовиков."
 source: «Агентство» (Telegram), пересказ Bloomberg
 url: https://t.me/agentstvonews/16698
 published: 2026-08-07
-tags: [research, deceptor, fsb, vtoraya-sluzhba, runet, telegram, duron, kirienko, elite-conflict]
+tags: [research, deceptor, fsb, vtoraya-sluzhba, runet, telegram, durov, kirienko, elite-conflict]
 ---
 
 # «Российская элита испугалась, что ФСБ вышла из-под контроля»
