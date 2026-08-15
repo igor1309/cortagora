@@ -1,6 +1,6 @@
 ---
 date: 2026-08-03
-model: claude-opus-5
+model: opus-5
 description: "The Bell (02.08.2026): «закону Яровой» 10 лет, СОРМ массово не внедрён даже у крупнейших операторов; после «Крокуса» Вторая служба ФСБ вскрыла провал системы и перехватила у «технарей» контроль над рунетом. Полный текст статьи + разбор для Deceptor Universe."
 source: The Bell, Мария Коломыченко
 url: https://thebell.io/sekret-yarovoy-kak-vtoraya-sluzhba-fsb-zakhvatila-kontrol-nad-runetom
