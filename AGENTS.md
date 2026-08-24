@@ -62,6 +62,26 @@ Notes:
 - Multi-line or Russian descriptions: use `--description-stdin` (or `--description-file`), not `--description`.
 - Agents available as assignees: `multica agent list`. There are no projects or labels defined in this workspace.
 
+### Who does what
+
+This table is the single source of truth for routing work between agents. Agent instructions should point here rather than restate it — the same role described in two places drifts. Get current UUIDs with `multica agent list`.
+
+| Agent | Owns | Never |
+| --- | --- | --- |
+| **Room Runner** | Process lead of the `Writers Room` squad: scope, modality, cast, briefs, the shared gate, attribution, escalation to the human. Decomposes creative work into briefs. | Doesn't own the story, canon, or a creative veto. |
+| **Тони Гилрой**, **Мишель Кинг** | Independent creative positions inside the room, reached through Room Runner. | Not assigned administrative or documentation work. |
+| **Researcher** | Subject-matter research: external sources and the story corpus. Owns files under `works/<work>/research/`, `works/<work>/inspo/` and root `research/`. Carries the source protocol — `verified` / `inferred` / `gap`. | Doesn't write scenes, doesn't arbitrate creative disputes. |
+| **Cortagora Note Triage & Brainstorm** | Filing an incoming note into the right layer and scope per `ARCHITECTURE.md`, cross-links and stubs, brainstorming its uses. Owns the placement rules. | Doesn't work the tracker. |
+| **Проектный ассистент** | Project state: `COR-*` triage and decomposition of organizational tickets, documentation (`README.md`, `docs/`, `docs/log.md`, `framework/*/README.md`, templates), `_inbox/` inventory, repo hygiene, digests. | Doesn't author creative material, doesn't research the subject matter, doesn't place incoming material by scope. |
+
+Routing rules for the cases where these touch:
+
+- **Placing an incoming note** → Note Triage & Brainstorm. Проектный ассистент may inventory `_inbox/` and propose a route, but the placement rules live in one agent, not two.
+- **A question about the world, the facts, or an external source** → Researcher. Проектный ассистент answers questions about the state of the project, not about its subject.
+- **Breaking down a creative task** (arc, character, scene, season structure) → Room Runner. Decomposing a story is itself a creative decision.
+- **Administrative or documentation work reaching a room agent** → hand it to Проектный ассистент rather than doing it in passing.
+- **Nobody writes `canon/`.** Canon is committed by the human as a separate, explicit step.
+
 ### Assigning to an agent
 
 `multica issue assign <KEY> --to-id <agent-uuid>` **dispatches the agent immediately** — there is no queue-without-running step. So the issue must be complete before it is assigned: finish the description first, assign last. Editing the description afterwards does not reach a run already in flight.
